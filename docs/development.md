@@ -71,3 +71,4 @@ Breaking changes:
 - Preserve original authorship and license notices.
 - Keep public documentation repository-relative and portable.
 - Do not commit local experiments, build artifacts, or internal-only planning files.
+- Treat `package.xml` as historical legacy metadata, not as the active development workflow.
