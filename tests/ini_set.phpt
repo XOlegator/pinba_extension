@@ -5,9 +5,10 @@ Check for ini_set("pinba.server", ...)
 --FILE--
 <?php
 echo "pinba extension is available\n";
-var_export(ini_get("pinba.server"));
-echo "\n\n";
 
+ini_set("pinba.server", "");
+var_export(ini_get("pinba.server"));
+echo "\n";
 var_export(ini_set("pinba.server", "one.server"));
 echo "\n";
 var_export(ini_get("pinba.server"));
@@ -26,7 +27,6 @@ echo "\n";
 --EXPECT--
 pinba extension is available
 ''
-
 ''
 'one.server'
 
