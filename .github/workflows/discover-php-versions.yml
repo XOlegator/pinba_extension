@@ -32,8 +32,8 @@ jobs:
         with:
           branch: ci/discover-php-versions
           delete-branch: true
-          commit-message: ci(matrix): refresh supported PHP versions
-          title: ci(matrix): refresh supported PHP versions
+          commit-message: "ci(matrix): refresh supported PHP versions"
+          title: "ci(matrix): refresh supported PHP versions"
           body: |
             ## Summary
             - refresh `.github/php-versions.json` from the official PHP supported versions page
