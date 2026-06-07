@@ -172,7 +172,7 @@ static inline pinba_client_t  *php_pinba_client_object(zend_object *obj) {
 	} while (0)
 #endif
 
-static int php_pinba_key_compare(const void *a, const void *b);
+static int php_pinba_key_compare(Bucket *a, Bucket *b);
 
 /* {{{ internal funcs */
 
@@ -679,7 +679,14 @@ static inline Pinba__Request *php_create_pinba_packet(pinba_client_t *client, co
 
 		request->status = SG(sapi_headers).http_response_code;
 		request->has_status = 1;
-#if defined(HAVE_MALLOC_H) && defined(HAVE_MALLINFO)
+#if defined(HAVE_MALLOC_H) && defined(__GLIBC__) && defined(__GLIBC_PREREQ) && __GLIBC_PREREQ(2, 33)
+		{
+			struct mallinfo2 info;
+
+			info = mallinfo2();
+			request->memory_footprint = info.arena;// + info.hblkhd;
+		}
+#elif defined(HAVE_MALLOC_H) && defined(HAVE_MALLINFO)
 		{
 			struct mallinfo info;
 
@@ -1059,26 +1066,21 @@ static void php_pinba_flush_data(const char *custom_script_name, long flags) /* 
 }
 /* }}} */
 
-static int php_pinba_key_compare(const void *a, const void *b) /* {{{ */
+static int php_pinba_key_compare(Bucket *a, Bucket *b) /* {{{ */
 {
-	Bucket *f;
-	Bucket *s;
 	zval first;
 	zval second;
 
-	f = (Bucket *) a;
-	s = (Bucket *) b;
-
-	if (f->key == NULL) {
-		ZVAL_LONG(&first, f->h);
+	if (a->key == NULL) {
+		ZVAL_LONG(&first, a->h);
 	} else {
-		ZVAL_STR(&first, f->key);
+		ZVAL_STR(&first, a->key);
 	}
 
-	if (s->key == NULL) {
-		ZVAL_LONG(&second, s->h);
+	if (b->key == NULL) {
+		ZVAL_LONG(&second, b->h);
 	} else {
-		ZVAL_STR(&second, s->key);
+		ZVAL_STR(&second, b->key);
 	}
 
 	return string_compare_function(&first, &second);
