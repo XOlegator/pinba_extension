@@ -6,8 +6,8 @@ Pinba Engine.
 
 This repository is an actively maintained fork of the original project:
 
-- Original project: https://github.com/tony2001/pinba_extension
-- Active fork: https://github.com/XOlegator/pinba_extension
+- Original project: [tony2001/pinba_extension](https://github.com/tony2001/pinba_extension)
+- Active fork: [XOlegator/pinba_extension](https://github.com/XOlegator/pinba_extension)
 
 ## Where This Project Fits
 
@@ -68,7 +68,8 @@ make test
 ```
 
 The active CI matrix validates this flow on `PHP 8.2`, `8.3`, `8.4`, and `8.5`.
-Distribution packaging and additional quality gates are the next modernization layers.
+Basic workflow and markdown linting are also enforced in GitHub Actions.
+Distribution packaging and deeper quality gates are the next modernization layers.
 
 ## Documentation
 
@@ -76,7 +77,7 @@ Distribution packaging and additional quality gates are the next modernization l
 - Local build and test workflow: [docs/build.md](docs/build.md)
 - Release process and automatic changelog flow: [docs/releasing.md](docs/releasing.md)
 - Historical legacy release notes: [docs/legacy-news.md](docs/legacy-news.md)
-- Shared Pinba knowledge base: https://github.com/XOlegator/pinba_engine/tree/master/knowledge
+- Shared Pinba knowledge base: [XOlegator/pinba_engine/knowledge](https://github.com/XOlegator/pinba_engine/tree/master/knowledge)
 
 ## Release Process
 

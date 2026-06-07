@@ -72,3 +72,4 @@ Breaking changes:
 - Keep public documentation repository-relative and portable.
 - Do not commit local experiments, build artifacts, or internal-only planning files.
 - Treat `package.xml` as historical legacy metadata, not as the active development workflow.
+- Keep workflow files and public markdown clean enough to pass the repository lint jobs.
