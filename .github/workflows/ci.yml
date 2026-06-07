@@ -1,0 +1,73 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  build-and-test:
+    name: Build and test / PHP ${{ matrix.php-version }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        php-version:
+          - "8.2"
+          - "8.3"
+          - "8.4"
+          - "8.5"
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php-version }}
+          coverage: none
+          tools: phpize
+
+      - name: Show toolchain
+        run: |
+          php -v
+          phpize -v
+          php-config --version
+
+      - name: Prepare build
+        run: phpize
+
+      - name: Configure
+        run: ./configure --enable-pinba
+
+      - name: Build
+        run: make -j"$(nproc)"
+
+      - name: Test
+        run: make test NO_INTERACTION=1 REPORT_EXIT_STATUS=1
+
+      - name: Upload test artifacts on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-artifacts-php${{ matrix.php-version }}
+          path: |
+            tests/*.diff
+            tests/*.exp
+            tests/*.log
+            tests/*.out
+            tests/*.php
+            tests/*.sh
+          if-no-files-found: ignore
+          retention-days: 14

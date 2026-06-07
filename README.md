@@ -62,17 +62,18 @@ Expected classic build flow:
 
 ```bash
 phpize
-./configure
+./configure --enable-pinba
 make -j"$(nproc)"
 make test
 ```
 
-Future work in this fork will add a documented multi-version build matrix, static analysis, and
-distribution packaging.
+The active CI matrix validates this flow on `PHP 8.2`, `8.3`, `8.4`, and `8.5`.
+Distribution packaging and additional quality gates are the next modernization layers.
 
 ## Documentation
 
 - Development workflow and branch/commit rules: [docs/development.md](docs/development.md)
+- Local build and test workflow: [docs/build.md](docs/build.md)
 - Release process and automatic changelog flow: [docs/releasing.md](docs/releasing.md)
 - Historical legacy release notes: [docs/legacy-news.md](docs/legacy-news.md)
 - Shared Pinba knowledge base: https://github.com/XOlegator/pinba_engine/tree/master/knowledge
