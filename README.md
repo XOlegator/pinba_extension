@@ -75,8 +75,12 @@ Distribution packaging and deeper quality gates are the next modernization layer
 
 - Development workflow and branch/commit rules: [docs/development.md](docs/development.md)
 - Local build and test workflow: [docs/build.md](docs/build.md)
+- Supported platforms and lifecycle policy: [docs/support-matrix.md](docs/support-matrix.md)
 - Release process and automatic changelog flow: [docs/releasing.md](docs/releasing.md)
 - Historical legacy release notes: [docs/legacy-news.md](docs/legacy-news.md)
+- Contribution guide: [CONTRIBUTING.md](CONTRIBUTING.md)
+- Security policy: [SECURITY.md](SECURITY.md)
+- Support policy: [SUPPORT.md](SUPPORT.md)
 - Shared Pinba knowledge base: [XOlegator/pinba_engine/knowledge](https://github.com/XOlegator/pinba_engine/tree/master/knowledge)
 
 ## Release Process

@@ -7,6 +7,7 @@ libtool
 install-sh
 include
 configure.in
+configure.ac
 configure
 config.sub
 config.status
@@ -26,6 +27,7 @@ Makefile.fragments
 Makefile
 .libs
 .deps
+*.dep
 *.lo
 *.o
 *.la
