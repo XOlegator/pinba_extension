@@ -1,0 +1,37 @@
+Pinba PHP Extension - Provenance and Third-Party Notices
+========================================================
+
+This repository is a maintained fork of the original Pinba PHP extension created by
+Antony Dovgal.
+
+Original upstream repository:
+  https://github.com/tony2001/pinba_extension
+
+Active fork maintainer:
+  Oleg Ekhlakov <o.ekhlakov@protonmail.ru>
+  https://github.com/XOlegator/pinba_extension
+
+Project license:
+  GNU Lesser General Public License version 2.1 or later.
+  See LICENSE and COPYING.
+
+Bundled third-party components:
+
+1. protobuf-c runtime
+   Files:
+     - protobuf-c.c
+     - protobuf-c.h
+     - protobuf-c-private.h
+   License:
+     Apache License 2.0
+   Copyright:
+     Dave Benson and protobuf-c contributors
+
+2. Generated protobuf bindings
+   Files:
+     - pinba-pb-c.c
+     - pinba.pb-c.h
+   Origin:
+     Generated from pinba.proto with protobuf-c tooling
+
+Keep original copyright and license notices intact when redistributing or modifying this fork.
