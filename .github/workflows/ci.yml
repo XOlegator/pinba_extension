@@ -16,17 +16,28 @@ permissions:
   contents: read
 
 jobs:
+  matrix:
+    name: Resolve support matrix
+    runs-on: ubuntu-latest
+    outputs:
+      php-versions: ${{ steps.read-matrix.outputs.php-versions }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Read PHP support matrix
+        id: read-matrix
+        run: echo "php-versions=$(jq -c '.targets.php' .github/php-versions.json)" >> "$GITHUB_OUTPUT"
+
   build-and-test:
+    needs: matrix
     name: Build and test / PHP ${{ matrix.php-version }}
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
-        php-version:
-          - "8.2"
-          - "8.3"
-          - "8.4"
-          - "8.5"
+        php-version: ${{ fromJson(needs.matrix.outputs.php-versions) }}
 
     steps:
       - name: Checkout

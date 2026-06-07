@@ -1,0 +1,22 @@
+{
+  "generated_at": "2026-06-07",
+  "source": "https://www.php.net/supported-versions.php",
+  "targets": {
+    "ubuntu": [
+      "24.04",
+      "26.04"
+    ],
+    "php": [
+      "8.2",
+      "8.3",
+      "8.4",
+      "8.5"
+    ]
+  },
+  "notes": {
+    "8.2": "security support only until 2026-12-31",
+    "8.3": "security support only until 2027-12-31",
+    "8.4": "active support until 2026-12-31",
+    "8.5": "active support until 2027-12-31"
+  }
+}
