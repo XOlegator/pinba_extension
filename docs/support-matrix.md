@@ -31,6 +31,8 @@ Status below is aligned with the official PHP supported versions page as checked
   metadata, rather than changing release automation silently.
 - Packaging support may lag build support while Ubuntu packages and Launchpad workflows are being
   finalized.
+- Scheduled automation refreshes `.github/php-versions.json`, but merge review is still required
+  before the fork treats a discovered branch as active support.
 
 ## Source
 

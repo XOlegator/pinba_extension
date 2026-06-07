@@ -1,0 +1,46 @@
+name: discover-php-versions
+
+on:
+  schedule:
+    - cron: "17 4 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  discover:
+    name: Discover supported PHP versions
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.4"
+          coverage: none
+
+      - name: Update PHP support matrix
+        run: php .github/scripts/update-php-support-matrix.php
+
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v7
+        with:
+          branch: ci/discover-php-versions
+          delete-branch: true
+          commit-message: "ci(matrix): refresh supported PHP versions"
+          title: "ci(matrix): refresh supported PHP versions"
+          body: |
+            ## Summary
+            - refresh `.github/php-versions.json` from the official PHP supported versions page
+            - keep CI and future packaging automation aligned with currently supported PHP branches
+
+            ## Notes
+            - this automation opens a PR instead of changing `master` directly
+            - newly discovered PHP branches still require successful CI before they should be treated as active fork support
+          add-paths: |
+            .github/php-versions.json

@@ -70,6 +70,7 @@ make test
 The active CI matrix validates this flow on `PHP 8.2`, `8.3`, `8.4`, and `8.5`.
 Basic workflow and markdown linting are also enforced in GitHub Actions.
 The PHP matrix source of truth is stored in `.github/php-versions.json`.
+The repository also includes scheduled discovery automation that refreshes that matrix through PRs.
 Distribution packaging and deeper quality gates are the next modernization layers.
 
 ## Documentation
