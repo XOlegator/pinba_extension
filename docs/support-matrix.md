@@ -36,3 +36,5 @@ Status below is aligned with the official PHP supported versions page as checked
 
 - Official PHP lifecycle page:
   [php.net/supported-versions](https://www.php.net/supported-versions.php)
+- Repository matrix metadata:
+  `.github/php-versions.json`

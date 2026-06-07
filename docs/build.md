@@ -11,6 +11,10 @@ The current active development baseline targets these PHP branches:
 
 Older PHP branches are not part of the active support matrix for this fork.
 
+The machine-readable source of truth for that matrix is:
+
+- `.github/php-versions.json`
+
 ## Local Build
 
 This project remains a standard PHP extension and is built with `phpize`.
@@ -55,6 +59,8 @@ GitHub Actions currently validates:
 - build on `PHP 8.4`
 - build on `PHP 8.5`
 - PHPT execution on the same matrix
+
+The CI workflow reads the PHP version list directly from `.github/php-versions.json`.
 
 ## Notes
 
