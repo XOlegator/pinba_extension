@@ -1,0 +1,13 @@
+Pinba PHP Extension - Authors
+=============================
+
+Original project (2009-2013):
+  Antony Dovgal <tony@daylessday.org>
+  https://github.com/tony2001/pinba_extension
+
+Notable contributor:
+  Florian Forster <ff at octo.it>  (IPv6 support)
+
+Fork maintainer (2026-present):
+  Oleg Ekhlakov <o.ekhlakov@protonmail.ru>
+  https://github.com/XOlegator/pinba_extension
