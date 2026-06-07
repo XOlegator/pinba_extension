@@ -1,0 +1,30 @@
+{
+  "generated_at": "2026-06-07",
+  "source_package": "php-pinba",
+  "ppa": "ppa:xolegator/packages",
+  "suites": {
+    "noble": {
+      "ubuntu_version": "24.04",
+      "php_versions": [
+        "8.2",
+        "8.3",
+        "8.4",
+        "8.5"
+      ]
+    },
+    "resolute": {
+      "ubuntu_version": "26.04",
+      "php_versions": [
+        "8.2",
+        "8.3",
+        "8.4",
+        "8.5"
+      ]
+    }
+  },
+  "binary_package_template": "php{php_version}-pinba",
+  "notes": [
+    "A discovered PHP branch is not enabled for packaging automatically until CI is green.",
+    "Launchpad builds should be driven by distro-specific source uploads and reviewed PRs."
+  ]
+}

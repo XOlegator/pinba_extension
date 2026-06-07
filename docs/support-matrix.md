@@ -40,3 +40,5 @@ Status below is aligned with the official PHP supported versions page as checked
   [php.net/supported-versions](https://www.php.net/supported-versions.php)
 - Repository matrix metadata:
   `.github/php-versions.json`
+- Packaging target metadata:
+  `.github/packaging-matrix.json`
