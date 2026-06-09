@@ -15,23 +15,29 @@ Project license:
   GNU Lesser General Public License version 2.1 or later.
   See LICENSE and COPYING.
 
-Bundled third-party components:
+External dependencies (not bundled):
 
 1. protobuf-c runtime
-   Files:
-     - protobuf-c.c
-     - protobuf-c.h
-     - protobuf-c-private.h
+   Provided by:
+     System library libprotobuf-c (>= 1.0.0), e.g. Debian/Ubuntu package
+     libprotobuf-c-dev at build time and libprotobuf-c1 at runtime.
    License:
      Apache License 2.0
    Copyright:
      Dave Benson and protobuf-c contributors
+   Note:
+     This runtime used to be vendored in this repository; it is now consumed
+     as a system dependency and is no longer carried here.
+
+Generated sources (in-tree):
 
 2. Generated protobuf bindings
    Files:
      - pinba-pb-c.c
      - pinba.pb-c.h
    Origin:
-     Generated from pinba.proto with protobuf-c tooling
+     Generated from pinba.proto with protobuf-c tooling (protoc-gen-c).
+     Regenerate with: protoc-c --c_out=. pinba.proto
+     (rename the generated pinba.pb-c.c to pinba-pb-c.c to match config.m4).
 
 Keep original copyright and license notices intact when redistributing or modifying this fork.

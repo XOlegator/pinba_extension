@@ -15,6 +15,35 @@ The machine-readable source of truth for that matrix is:
 
 - `.github/php-versions.json`
 
+## Build Dependencies
+
+The extension links against the system **protobuf-c** runtime (it is no longer
+vendored). Required at build time:
+
+- `libprotobuf-c-dev` (headers + `pkg-config` entry, `>= 1.0.0`)
+- `protobuf-c-compiler` (`protoc-c`) — only needed to regenerate the bindings,
+  not for a normal build
+
+At runtime the shared library `libprotobuf-c1` is required.
+
+On Debian/Ubuntu:
+
+```bash
+sudo apt-get install -y libprotobuf-c-dev protobuf-c-compiler
+```
+
+The C bindings `pinba-pb-c.c` / `pinba.pb-c.h` are generated from `pinba.proto`
+and committed to the repository, so a normal build does not invoke `protoc-c`.
+To regenerate them after changing `pinba.proto`:
+
+```bash
+protoc-c --c_out=. pinba.proto
+mv pinba.pb-c.c pinba-pb-c.c   # match the filename used by config.m4
+```
+
+`pinba.proto` is a stable wire contract shared with the Pinba Engine; only
+append fields, never renumber or retype existing ones.
+
 ## Local Build
 
 This project remains a standard PHP extension and is built with `phpize`.

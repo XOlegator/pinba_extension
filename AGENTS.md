@@ -48,6 +48,20 @@ make test
 
 When multiple PHP versions are supported, build and test against each target PHP ABI explicitly.
 
+## GitHub Actions
+
+- When adding or editing a workflow, pin every third-party action to its current
+  major version. Always verify the latest release before committing instead of
+  reusing a version from memory or copying an old example, e.g.:
+
+  ```bash
+  gh api repos/actions/checkout/releases/latest --jq .tag_name
+  ```
+
+- Reference actions by their major tag (e.g. `actions/checkout@v6`) so they track
+  the latest compatible patch, and never introduce a version older than what the
+  rest of the repository (or the sibling Pinba repositories) already uses.
+
 ## Packaging Direction
 
 - Debian and Launchpad packaging should target Ubuntu 24.04 and Ubuntu 26.04.
