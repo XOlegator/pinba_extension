@@ -63,9 +63,6 @@ ZEND_BEGIN_MODULE_GLOBALS(pinba) /* {{{ */
 	pinba_collector collectors[PINBA_COLLECTORS_MAX];
 	unsigned int n_collectors; /* number of collectors we got from ini file */
 	char *collector_address; /* this is a lil broken, contains last address only */
-#if PHP_VERSION_ID < 50400
-	int (*old_sapi_ub_write) (const char *, unsigned int TSRMLS_DC);
-#endif
 	char host_name[128];
 	char schema[17];
 	char *server_name;
@@ -74,19 +71,15 @@ ZEND_BEGIN_MODULE_GLOBALS(pinba) /* {{{ */
 	HashTable timers;
 	HashTable tags;
 	pinba_req_data tmp_req_data;
-	zend_bool timers_stopped;
-	zend_bool in_rshutdown;
-	zend_bool enabled;
-	zend_bool auto_flush;
+	bool timers_stopped;
+	bool in_rshutdown;
+	bool enabled;
+	bool auto_flush;
 	time_t resolve_interval; /* seconds */
 ZEND_END_MODULE_GLOBALS(pinba)
 /* }}} */
 
-#ifdef ZTS
-#define PINBA_G(v) TSRMG(pinba_globals_id, zend_pinba_globals *, v)
-#else
-#define PINBA_G(v) (pinba_globals.v)
-#endif
+#define PINBA_G(v) ZEND_MODULE_GLOBALS_ACCESSOR(pinba, v)
 
 #endif	/* PHP_PINBA_H */
 
