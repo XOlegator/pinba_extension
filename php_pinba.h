@@ -1,6 +1,12 @@
 /*
+ * SPDX-License-Identifier: LGPL-2.1-or-later
+ *
  * Authors: Antony Dovgal <tony@daylessday.org>
  *          Florian Forster <ff at octo.it>  (IPv6 support)
+ *
+ * Fork maintenance and modernization (2026-present):
+ *          Oleg Ekhlakov <o.ekhlakov@protonmail.com>
+ *          https://github.com/XOlegator/pinba_extension
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public

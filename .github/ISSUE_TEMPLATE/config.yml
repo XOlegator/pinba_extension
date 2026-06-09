@@ -1,5 +1,5 @@
 blank_issues_enabled: false
 contact_links:
   - name: Security reports
-    url: mailto:o.ekhlakov@protonmail.ru
+    url: mailto:o.ekhlakov@protonmail.com
     about: Report suspected security issues privately instead of opening a public issue.
