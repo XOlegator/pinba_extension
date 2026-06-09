@@ -25,6 +25,7 @@ Makefile.objects
 Makefile.global
 Makefile.fragments
 Makefile
+.idea/
 .libs
 .deps
 *.dep
