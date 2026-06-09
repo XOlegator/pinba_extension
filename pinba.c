@@ -1,6 +1,12 @@
 /*
+ * SPDX-License-Identifier: LGPL-2.1-or-later
+ *
  * Authors: Antony Dovgal <tony@daylessday.org>
  *          Florian Forster <ff at octo.it>  (IPv6 support)
+ *
+ * Fork maintenance and modernization (2026-present):
+ *          Oleg Ekhlakov <o.ekhlakov@protonmail.com>
+ *          https://github.com/XOlegator/pinba_extension
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -81,12 +87,6 @@ ZEND_GET_MODULE(pinba)
 
 static int le_pinba_timer;
 size_t (*old_sapi_ub_write) (const char *, size_t);
-
-#if ZEND_MODULE_API_NO > 20020429
-#define ONUPDATELONGFUNC OnUpdateLong
-#else
-#define ONUPDATELONGFUNC OnUpdateInt
-#endif
 
 #define PINBA_FLUSH_ONLY_STOPPED_TIMERS (1<<0)
 #define PINBA_FLUSH_RESET_DATA (1<<1)
@@ -455,11 +455,7 @@ static int php_pinba_timer_delete_helper(zval *zv) /* {{{ */
 static size_t sapi_ub_write_counter(const char *str, size_t length) /* {{{ */
 {
 	PINBA_G(tmp_req_data).doc_size += length;
-#if PHP_VERSION_ID < 50400
-	return PINBA_G(old_sapi_ub_write)(str, length);
-#else
 	return old_sapi_ub_write(str, length);
-#endif
 }
 /* }}} */
 
@@ -647,14 +643,7 @@ static inline Pinba__Request *php_create_pinba_packet(pinba_client_t *client, co
 		struct timeval ru_utime = {0, 0}, ru_stime = {0, 0};
 		struct rusage u;
 
-#if PHP_MAJOR_VERSION >= 5
 		req_data->mem_peak_usage = zend_memory_peak_usage(1);
-#elif PHP_MAJOR_VERSION == 4 && MEMORY_LIMIT
-		req_data->mem_peak_usage = AG(allocated_memory_peak);
-#else
-		/* no data available */
-		req_data->mem_peak_usage = 0;
-#endif
 
 		request->memory_peak = req_data->mem_peak_usage;
 		request->request_count = req_data->req_count;
@@ -1326,11 +1315,7 @@ static PHP_FUNCTION(pinba_timer_start)
 		timeval_cvt(&t->tmp_ru_stime, &u.ru_stime);
 	}
 	/* refcount++ so that the timer is shut down only on request finish if not stopped manually */
-#if PHP_VERSION_ID < 70300
-	GC_REFCOUNT(rsrc)++;
-#else
 	GC_ADDREF(rsrc);
-#endif
 	RETURN_RES(rsrc);
 }
 /* }}} */
@@ -1399,11 +1384,7 @@ static PHP_FUNCTION(pinba_timer_add)
 	t->rsrc_id = rsrc->handle;
 
 	/* refcount++ so that the timer is shut down only on request finish if not stopped manually */
-#if PHP_VERSION_ID < 70300
-	GC_REFCOUNT(rsrc)++;
-#else
 	GC_ADDREF(rsrc);
-#endif
 	RETURN_RES(rsrc);
 }
 /* }}} */
@@ -1671,9 +1652,7 @@ static PHP_FUNCTION(pinba_get_info)
 	zval *zv;
 	pinba_timer_t *t;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "") != SUCCESS) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	array_init(return_value);
 
@@ -1815,9 +1794,7 @@ static PHP_FUNCTION(pinba_timers_stop)
 	struct timeval now;
 	struct rusage u;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "") != SUCCESS) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	if (gettimeofday(&now, 0) != 0 || getrusage(RUSAGE_SELF, &u) != 0) {
 		RETURN_FALSE;
@@ -1862,11 +1839,7 @@ static PHP_FUNCTION(pinba_timers_get)
 				continue;
 			}
 			/* refcount++ */
-#if PHP_VERSION_ID < 70300
-			GC_REFCOUNT(rsrc)++;
-#else
 			GC_ADDREF(rsrc);
-#endif
 			add_next_index_resource(return_value, rsrc);
 		}
 	}
@@ -2046,9 +2019,7 @@ static PHP_FUNCTION(pinba_tags_get)
 	char *value;
 	HashPosition pos;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "") != SUCCESS) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	array_init(return_value);
 	for (zend_hash_internal_pointer_reset_ex(&PINBA_G(tags), &pos);
@@ -2524,7 +2495,7 @@ zend_function_entry pinba_functions[] = {
 	PINBA_FUNC(pinba_tag_get)
 	PINBA_FUNC(pinba_tag_delete)
 	PINBA_FUNC(pinba_tags_get)
-	{NULL, NULL, NULL}
+	PHP_FE_END
 };
 /* }}} */
 
@@ -2578,7 +2549,7 @@ zend_function_entry pinba_client_methods[] = {
 	PHP_ME(PinbaClient, addTimer, arginfo_settimer, ZEND_ACC_PUBLIC)
 	PHP_ME(PinbaClient, send, arginfo_send, ZEND_ACC_PUBLIC)
 	PHP_ME(PinbaClient, getData, arginfo_getdata, ZEND_ACC_PUBLIC)
-	{NULL, NULL, NULL}
+	PHP_FE_END
 };
 /* }}} */
 
@@ -2674,10 +2645,8 @@ static PHP_MINIT_FUNCTION(pinba)
 	REGISTER_LONG_CONSTANT("PINBA_ONLY_RUNNING_TIMERS", PINBA_ONLY_RUNNING_TIMERS, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("PINBA_AUTO_FLUSH", PINBA_AUTO_FLUSH, CONST_CS | CONST_PERSISTENT);
 
-#if PHP_VERSION_ID >= 50400
 	old_sapi_ub_write = sapi_module.ub_write;
 	sapi_module.ub_write = sapi_ub_write_counter;
-#endif
 
 	INIT_CLASS_ENTRY(ce, "PinbaClient", pinba_client_methods);
 	pinba_client_ce = zend_register_internal_class_ex(&ce, NULL);
@@ -2771,10 +2740,6 @@ static PHP_RSHUTDOWN_FUNCTION(pinba)
 	zend_hash_destroy(&PINBA_G(timers));
 	zend_hash_destroy(&PINBA_G(tags));
 
-#if PHP_VERSION_ID < 50400
-	OG(php_header_write) = PINBA_G(old_sapi_ub_write);
-#endif
-
 	if (PINBA_G(server_name)) {
 		efree(PINBA_G(server_name));
 		PINBA_G(server_name) = NULL;
@@ -2805,9 +2770,7 @@ static PHP_MINFO_FUNCTION(pinba)
 /* {{{ pinba_module_entry
  */
 zend_module_entry pinba_module_entry = {
-#if ZEND_MODULE_API_NO >= 20010901
 	STANDARD_MODULE_HEADER,
-#endif
 	"pinba",
 	pinba_functions,
 	PHP_MINIT(pinba),
@@ -2815,9 +2778,7 @@ zend_module_entry pinba_module_entry = {
 	PHP_RINIT(pinba),
 	PHP_RSHUTDOWN(pinba),
 	PHP_MINFO(pinba),
-#if ZEND_MODULE_API_NO >= 20010901
 	PHP_PINBA_VERSION,
-#endif
 	STANDARD_MODULE_PROPERTIES
 };
 /* }}} */

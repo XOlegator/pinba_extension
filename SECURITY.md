@@ -22,7 +22,7 @@ Please do not open a public issue for a suspected security vulnerability.
 
 Report it privately to:
 
-- Oleg Ekhlakov <o.ekhlakov@protonmail.ru>
+- Oleg Ekhlakov <o.ekhlakov@protonmail.com>
 
 Include, when possible:
 
