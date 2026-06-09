@@ -1,0 +1,49 @@
+name: Proto drift
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+
+concurrency:
+  group: proto-drift-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    name: Bindings match pinba.proto
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install protobuf-c compiler
+        run: |
+          sudo apt-get update -q
+          sudo apt-get install -y --no-install-recommends protobuf-c-compiler
+
+      - name: Show generator version
+        run: protoc-c --version
+
+      - name: Regenerate bindings from pinba.proto
+        run: |
+          protoc-c --c_out=. pinba.proto
+          mv -f pinba.pb-c.c pinba-pb-c.c
+
+      - name: Verify committed bindings are in sync
+        run: |
+          if ! git diff --quiet -- pinba-pb-c.c pinba.pb-c.h; then
+            echo "::error::Committed protobuf bindings are out of sync with pinba.proto."
+            echo "Regenerate and commit them with:"
+            echo "  protoc-c --c_out=. pinba.proto && mv -f pinba.pb-c.c pinba-pb-c.c"
+            git --no-pager diff -- pinba-pb-c.c pinba.pb-c.h
+            exit 1
+          fi
+          echo "Committed bindings are in sync with pinba.proto."
