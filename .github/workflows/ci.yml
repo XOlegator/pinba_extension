@@ -165,7 +165,7 @@ jobs:
 
       - name: Build ASan PHP
         if: steps.cache-php-asan.outputs.cache-hit != 'true'
-        run: bash tools/build-php-asan.sh PHP-8.4
+        run: bash tools/build-php-asan.sh 8.4
 
       - name: Put ASan PHP on PATH
         run: echo "$HOME/php-asan/bin" >> "$GITHUB_PATH"
