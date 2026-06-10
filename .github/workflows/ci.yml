@@ -34,6 +34,9 @@ jobs:
     needs: matrix
     name: Build and test / PHP ${{ matrix.php-version }}
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      checks: write
     strategy:
       fail-fast: false
       matrix:
@@ -72,6 +75,16 @@ jobs:
 
       - name: Test
         run: make test NO_INTERACTION=1 REPORT_EXIT_STATUS=1
+        env:
+          TEST_PHP_JUNIT: ${{ github.workspace }}/tests/junit.xml
+
+      - name: Publish test report
+        if: always()
+        uses: mikepenz/action-junit-report@v6
+        with:
+          report_paths: tests/junit.xml
+          check_name: PHPT report (PHP ${{ matrix.php-version }})
+          require_tests: true
 
       - name: Upload test artifacts on failure
         if: failure()
@@ -79,6 +92,7 @@ jobs:
         with:
           name: test-artifacts-php${{ matrix.php-version }}
           path: |
+            tests/junit.xml
             tests/*.diff
             tests/*.exp
             tests/*.log
@@ -87,3 +101,89 @@ jobs:
             tests/*.sh
           if-no-files-found: ignore
           retention-days: 14
+
+  coverage:
+    name: Coverage (C, gcov)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          coverage: none
+          tools: phpize
+
+      - name: Install build dependencies
+        run: |
+          sudo apt-get update -q
+          sudo apt-get install -y --no-install-recommends libprotobuf-c-dev gcovr
+
+      - name: Build instrumented extension and run tests
+        run: bash tools/run-tests.sh coverage
+
+      - name: Upload coverage report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-xml
+          path: coverage.xml
+          if-no-files-found: warn
+          retention-days: 14
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v7
+        with:
+          files: coverage.xml
+          flags: phpt
+          fail_ci_if_error: false
+          token: ${{ secrets.CODECOV_TOKEN }}
+
+  sanitizers:
+    name: Sanitizers (ASan + UBSan)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          coverage: none
+          tools: phpize
+
+      - name: Install build dependencies
+        run: |
+          sudo apt-get update -q
+          sudo apt-get install -y --no-install-recommends libprotobuf-c-dev
+
+      - name: Build with ASan/UBSan and run tests
+        run: bash tools/run-tests.sh asan
+
+  valgrind:
+    name: Valgrind memcheck (informational)
+    runs-on: ubuntu-latest
+    # PHP itself produces benign noise under Valgrind, so this job reports
+    # findings without blocking the build until a suppression file is curated.
+    continue-on-error: true
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          coverage: none
+          tools: phpize
+
+      - name: Install build dependencies
+        run: |
+          sudo apt-get update -q
+          sudo apt-get install -y --no-install-recommends libprotobuf-c-dev valgrind
+
+      - name: Build and run tests under Valgrind
+        run: bash tools/run-tests.sh valgrind

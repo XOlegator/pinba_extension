@@ -33,6 +33,9 @@ jobs:
         with:
           shellcheck: true
 
+      - name: Shellcheck standalone scripts
+        run: shellcheck tools/*.sh
+
   markdownlint:
     name: markdownlint
     runs-on: ubuntu-latest

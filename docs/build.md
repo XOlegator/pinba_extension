@@ -67,16 +67,30 @@ make -j"$(nproc)"
 make test
 ```
 
-## Smoke Test
+## Testing
 
-Current smoke coverage includes:
+The extension is tested with the standard PHP `.phpt` harness (`run-tests.php`),
+the canonical test format for C extensions. Run the whole suite with:
 
-- `tests/ini_set.phpt`
+```bash
+make test
+```
 
-Run only the smoke test:
+Run a single test:
 
 ```bash
 make test NO_INTERACTION=1 REPORT_EXIT_STATUS=1 TESTS=tests/ini_set.phpt
+```
+
+`tools/run-tests.sh` wraps the build-and-test cycle so local runs and CI share
+one recipe. It rebuilds the extension with the flags appropriate for each mode
+and always writes a JUnit report to `tests/junit.xml`:
+
+```bash
+tools/run-tests.sh test       # plain optimized build (default)
+tools/run-tests.sh coverage   # gcov-instrumented build; writes coverage.xml (needs gcovr)
+tools/run-tests.sh asan       # AddressSanitizer + UBSan build
+tools/run-tests.sh valgrind   # run each test under Valgrind memcheck (needs valgrind)
 ```
 
 ## CI Matrix
@@ -88,6 +102,9 @@ GitHub Actions currently validates:
 - build on `PHP 8.4`
 - build on `PHP 8.5`
 - PHPT execution on the same matrix
+- C code coverage (gcov/gcovr) uploaded to Codecov
+- AddressSanitizer + UBSan run of the PHPT suite
+- Valgrind memcheck run (informational, non-blocking)
 
 The CI workflow reads the PHP version list directly from `.github/php-versions.json`.
 
