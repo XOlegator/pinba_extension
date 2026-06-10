@@ -103,8 +103,13 @@ GitHub Actions currently validates:
 - build on `PHP 8.5`
 - PHPT execution on the same matrix
 - C code coverage (gcov/gcovr) uploaded to Codecov
-- AddressSanitizer + UBSan run of the PHPT suite
+- AddressSanitizer + UBSan run of the PHPT suite (informational, non-blocking)
 - Valgrind memcheck run (informational, non-blocking)
+
+The sanitizer and Valgrind jobs are informational because the setup-php runtime
+loads extensions with `RTLD_DEEPBIND` (which ASan rejects) and PHP itself is
+noisy under Valgrind. Locally `tools/run-tests.sh asan` is clean against a PHP
+built without `RTLD_DEEPBIND`.
 
 The CI workflow reads the PHP version list directly from `.github/php-versions.json`.
 
