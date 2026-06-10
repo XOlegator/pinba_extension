@@ -144,34 +144,40 @@ jobs:
   sanitizers:
     name: Sanitizers (ASan + UBSan)
     runs-on: ubuntu-latest
-    # The setup-php runtime loads extensions with RTLD_DEEPBIND, which ASan
-    # rejects when only the extension (not PHP) is instrumented. Run the check
-    # for signal but keep it non-blocking until an ASan-instrumented PHP build
-    # is wired up; the same `tools/run-tests.sh asan` is clean on a PHP built
-    # without RTLD_DEEPBIND (e.g. local dev builds).
-    continue-on-error: true
+    # PHP itself is built with ASan/UBSan so the instrumented extension is not
+    # loaded into a stock PHP (which uses RTLD_DEEPBIND and breaks ASan). This
+    # makes the run a real, gating memory-safety check.
     steps:
       - name: Checkout
         uses: actions/checkout@v6
 
-      - name: Setup PHP
-        uses: shivammathur/setup-php@v2
-        with:
-          php-version: '8.4'
-          coverage: none
-          tools: phpize
-
       - name: Install build dependencies
         run: |
           sudo apt-get update -q
-          sudo apt-get install -y --no-install-recommends libprotobuf-c-dev
+          sudo apt-get install -y --no-install-recommends libprotobuf-c-dev pkg-config
+
+      - name: Cache ASan PHP build
+        id: cache-php-asan
+        uses: actions/cache@v5
+        with:
+          path: ~/php-asan
+          key: php-asan-${{ runner.os }}-PHP-8.4-${{ hashFiles('tools/build-php-asan.sh') }}
+
+      - name: Build ASan PHP
+        if: steps.cache-php-asan.outputs.cache-hit != 'true'
+        run: bash tools/build-php-asan.sh PHP-8.4
+
+      - name: Put ASan PHP on PATH
+        run: echo "$HOME/php-asan/bin" >> "$GITHUB_PATH"
 
       - name: Relax ASLR entropy for ASan
         # Ubuntu 24.04 runners default to vm.mmap_rnd_bits=32, which the gcc 13
         # ASan runtime cannot map shadow memory against (it aborts at startup).
         run: sudo sysctl -w vm.mmap_rnd_bits=28
 
-      - name: Build with ASan/UBSan and run tests
+      - name: Build extension and run tests under ASan/UBSan
+        env:
+          PHP_ASAN: '1'
         run: bash tools/run-tests.sh asan
 
       - name: Upload sanitizer test artifacts on failure

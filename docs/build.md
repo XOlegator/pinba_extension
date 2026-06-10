@@ -103,13 +103,18 @@ GitHub Actions currently validates:
 - build on `PHP 8.5`
 - PHPT execution on the same matrix
 - C code coverage (gcov/gcovr) uploaded to Codecov
-- AddressSanitizer + UBSan run of the PHPT suite (informational, non-blocking)
+- AddressSanitizer + UBSan run of the PHPT suite against an ASan-instrumented PHP
 - Valgrind memcheck run (informational, non-blocking)
 
-The sanitizer and Valgrind jobs are informational because the setup-php runtime
-loads extensions with `RTLD_DEEPBIND` (which ASan rejects) and PHP itself is
-noisy under Valgrind. Locally `tools/run-tests.sh asan` is clean against a PHP
-built without `RTLD_DEEPBIND`.
+The sanitizer job builds PHP itself with ASan/UBSan (via `tools/build-php-asan.sh`,
+cached between runs) so the instrumented extension is not loaded into a stock PHP
+— a stock PHP uses `RTLD_DEEPBIND`, which ASan rejects. The Valgrind job stays
+informational because PHP is noisy under Valgrind until a suppression file is
+curated.
+
+`tools/run-tests.sh asan` works locally too: it preloads the ASan runtime, which
+is fine on a PHP built without `RTLD_DEEPBIND` (typical local dev builds), and
+skips the preload when run against an instrumented PHP (`PHP_ASAN=1`).
 
 The CI workflow reads the PHP version list directly from `.github/php-versions.json`.
 

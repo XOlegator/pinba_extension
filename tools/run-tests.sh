@@ -51,18 +51,22 @@ make -j"$(nproc)"
 
 echo "==> [$MODE] running PHPT suite"
 if [ "$MODE" = "asan" ]; then
-    # The extension is instrumented but PHP itself is not, so preload the ASan
-    # runtime and let PHP use the system allocator. PHP leaks at shutdown by
-    # design, so leak detection is left to the Valgrind mode.
-    # Only the extension is instrumented, not PHP, so memory crosses the
-    # instrumented/uninstrumented boundary: tolerate alloc/dealloc and ODR
-    # mismatches from that boundary while still catching overflows, UAF and UB.
-    # Leak detection is left to the Valgrind mode (PHP leaks at shutdown).
-    USE_ZEND_ALLOC=0 \
-    LD_PRELOAD="$(gcc -print-file-name=libasan.so)" \
-    ASAN_OPTIONS="detect_leaks=0:verify_asan_link_order=0:alloc_dealloc_mismatch=0:new_delete_type_mismatch=0:detect_odr_violation=0:abort_on_error=0" \
-    UBSAN_OPTIONS="print_stacktrace=1" \
-    make test TEST_PHP_ARGS="$test_php_args"
+    # Leak detection is left to the Valgrind mode (PHP leaks at shutdown). The
+    # alloc/dealloc/ODR mismatch checks only fire at the instrumented/uninstru-
+    # mented boundary, so they are tolerated while overflows, UAF and UB still
+    # fail the run.
+    asan_env=(
+        "USE_ZEND_ALLOC=0"
+        "ASAN_OPTIONS=detect_leaks=0:verify_asan_link_order=0:alloc_dealloc_mismatch=0:new_delete_type_mismatch=0:detect_odr_violation=0:abort_on_error=1"
+        "UBSAN_OPTIONS=print_stacktrace=1:halt_on_error=1"
+    )
+    if [ "${PHP_ASAN:-0}" != "1" ]; then
+        # PHP is not instrumented: preload the ASan runtime so the extension's
+        # instrumentation has a runtime. Only works on a PHP built without
+        # RTLD_DEEPBIND; CI instead builds an instrumented PHP and sets PHP_ASAN.
+        asan_env+=("LD_PRELOAD=$(gcc -print-file-name=libasan.so)")
+    fi
+    env "${asan_env[@]}" make test TEST_PHP_ARGS="$test_php_args"
 else
     make test TEST_PHP_ARGS="$test_php_args"
 fi
