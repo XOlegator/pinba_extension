@@ -1031,7 +1031,9 @@ static void php_pinba_flush_data(const char *custom_script_name, long flags) /* 
 	if (!PINBA_G(enabled) || PINBA_G(n_collectors) == 0) {
 		/* disabled or no collectors defined, exit */
 		zend_hash_clean(&PINBA_G(timers));
-		zend_hash_apply(&EG(regular_list), (apply_func_t) php_pinba_timer_delete_helper);
+		if (!PINBA_G(in_rshutdown)) {
+			zend_hash_apply(&EG(regular_list), (apply_func_t) php_pinba_timer_delete_helper);
+		}
 		PINBA_G(timers_stopped) = 0;
 		return;
 	}
@@ -1047,8 +1049,10 @@ static void php_pinba_flush_data(const char *custom_script_name, long flags) /* 
 		php_pinba_reset_data();
 	}
 
-	/* delete all stopped timers */
-	zend_hash_apply(&EG(regular_list), (apply_func_t) php_pinba_timer_delete_helper);
+	/* delete all stopped timers (during shutdown the executor frees them) */
+	if (!PINBA_G(in_rshutdown)) {
+		zend_hash_apply(&EG(regular_list), (apply_func_t) php_pinba_timer_delete_helper);
+	}
 
 	PINBA_G(timers_stopped) = 0;
 	zend_hash_clean(&PINBA_G(timers));
@@ -2426,6 +2430,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_pinba_timers_stop, 0, 0, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_pinba_timers_get, 0, 0, 0)
+	ZEND_ARG_INFO(0, flags)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_pinba_script_name_set, 0, 0, 1)
@@ -2733,6 +2738,11 @@ static PHP_RINIT_FUNCTION(pinba)
  */
 static PHP_RSHUTDOWN_FUNCTION(pinba)
 {
+	/* Mark shutdown before flushing: at request end the engine must not delete
+	   timer resources from EG(regular_list) itself, because the executor frees
+	   that list right afterwards -- doing both freed each timer twice. */
+	PINBA_G(in_rshutdown) = 1;
+
 	if (PINBA_G(auto_flush)) {
 		php_pinba_flush_data(NULL, 0);
 	}
@@ -2748,7 +2758,6 @@ static PHP_RSHUTDOWN_FUNCTION(pinba)
 		efree(PINBA_G(script_name));
 		PINBA_G(script_name) = NULL;
 	}
-	PINBA_G(in_rshutdown) = 1;
 	return SUCCESS;
 }
 /* }}} */

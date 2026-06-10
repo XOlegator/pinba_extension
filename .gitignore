@@ -32,3 +32,14 @@ Makefile
 *.lo
 *.o
 *.la
+
+# Test, coverage and sanitizer artifacts
+tests/junit.xml
+tests/*.diff
+tests/*.out
+tests/*.exp
+tests/*.log
+coverage.xml
+*.gcov
+*.gcda
+*.gcno
