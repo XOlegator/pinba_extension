@@ -65,6 +65,10 @@ fi
 
 if [ "$MODE" = "coverage" ]; then
     echo "==> [coverage] generating coverage.xml"
+    # ./configure compiles throwaway conftest probes; with coverage flags they
+    # leave orphan .gcno files with no source that would break gcovr.
+    rm -f "$ROOT"/a-conftest.* "$ROOT"/conftest.*
     gcovr --root "$ROOT" --filter "$ROOT/pinba\.c" \
+        --gcov-ignore-errors=no_working_dir_found \
         --xml-pretty --output "$ROOT/coverage.xml" --txt
 fi

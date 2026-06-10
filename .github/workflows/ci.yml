@@ -160,8 +160,25 @@ jobs:
           sudo apt-get update -q
           sudo apt-get install -y --no-install-recommends libprotobuf-c-dev
 
+      - name: Relax ASLR entropy for ASan
+        # Ubuntu 24.04 runners default to vm.mmap_rnd_bits=32, which the gcc 13
+        # ASan runtime cannot map shadow memory against (it aborts at startup).
+        run: sudo sysctl -w vm.mmap_rnd_bits=28
+
       - name: Build with ASan/UBSan and run tests
         run: bash tools/run-tests.sh asan
+
+      - name: Upload sanitizer test artifacts on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: sanitizer-artifacts
+          path: |
+            tests/*.out
+            tests/*.log
+            tests/*.diff
+          if-no-files-found: ignore
+          retention-days: 14
 
   valgrind:
     name: Valgrind memcheck (informational)
