@@ -887,17 +887,27 @@ static inline Pinba__Request *php_create_pinba_packet(pinba_client_t *client,
     for (zend_hash_internal_pointer_reset_ex(&timers_uniq, &pos);
          (t = zend_hash_get_current_data_ptr_ex(&timers_uniq, &pos)) != NULL;
          zend_hash_move_forward_ex(&timers_uniq, &pos)) {
-      request->timer_tag_name =
+      /* realloc into a temporary so the original buffer is not lost (and the
+       * struct field is not left dangling) if realloc fails: on failure realloc
+       * leaves the original allocation intact, and free_unpacked then frees the
+       * still-valid field. */
+      uint32_t *new_tag_name =
           realloc(request->timer_tag_name,
-                  sizeof(unsigned int) * (request->n_timer_tag_name + t->tags_num));
-      request->timer_tag_value =
-          realloc(request->timer_tag_value,
-                  sizeof(unsigned int) * (request->n_timer_tag_value + t->tags_num));
-
-      if (!request->timer_tag_name || !request->timer_tag_value) {
+                  sizeof(*request->timer_tag_name) * (request->n_timer_tag_name + t->tags_num));
+      if (!new_tag_name) {
         pinba__request__free_unpacked(request, NULL);
         return NULL;
       }
+      request->timer_tag_name = new_tag_name;
+
+      uint32_t *new_tag_value =
+          realloc(request->timer_tag_value,
+                  sizeof(*request->timer_tag_value) * (request->n_timer_tag_value + t->tags_num));
+      if (!new_tag_value) {
+        pinba__request__free_unpacked(request, NULL);
+        return NULL;
+      }
+      request->timer_tag_value = new_tag_value;
 
       for (i = 0; i < t->tags_num; i++) {
         request->timer_tag_name[request->n_timer_tag_name + i] = t->tags[i]->name_id;
