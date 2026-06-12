@@ -4,6 +4,13 @@ All notable changes in this fork are tracked here by release automation.
 
 Historical upstream release notes are preserved in `NEWS` and `docs/legacy-news.md`.
 
+## [1.2.2](https://github.com/XOlegator/pinba_extension/compare/v1.2.1...v1.2.2) (2026-06-12)
+
+
+### Bug Fixes
+
+* **packaging:** build only PHP versions available per Ubuntu suite ([#26](https://github.com/XOlegator/pinba_extension/issues/26)) ([5b65d88](https://github.com/XOlegator/pinba_extension/commit/5b65d881bad36dcebbac1905914ac9dcbf1c00dd))
+
 ## [1.2.1](https://github.com/XOlegator/pinba_extension/compare/v1.2.0...v1.2.1) (2026-06-12)
 
 
