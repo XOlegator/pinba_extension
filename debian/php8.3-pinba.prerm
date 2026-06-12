@@ -1,0 +1,12 @@
+#!/bin/sh
+set -e
+
+if [ "$1" = "remove" ] || [ "$1" = "deconfigure" ]; then
+    if command -v phpdismod >/dev/null 2>&1; then
+        phpdismod -v 8.3 pinba || true
+    fi
+fi
+
+#DEBHELPER#
+
+exit 0

@@ -1,0 +1,6 @@
+# The orig tarball is produced with "git archive HEAD", so it contains only
+# git-tracked files. dpkg-source in 3.0 (quilt) mode diffs the working tree
+# against that orig; any build artifact absent from orig would otherwise abort
+# the source build. These are the phpize/autoconf and per-version build outputs
+# (see .gitignore) plus the local-only internal docs.
+extend-diff-ignore = ^(configure|configure\.(in|ac)|config\.(h|h\.in|sub|guess|status|nice|log)|aclocal\.m4|acinclude\.m4|autom4te\.cache|libtool|ltmain\.sh|install-sh|missing|mkinstalldirs|include|build|modules|run-tests\.php|Makefile|Makefile\.(objects|global|fragments)|\.deps|\.libs|.*\.(lo|o|la|dep|gcov|gcno|gcda)|tests/.*\.(diff|out|exp|log)|tests/junit\.xml|coverage\.xml|docs/internal|debian/build-.*|debian/php-ppa-build\.mk|\.idea|\.claude|\.codex|\.vscode|\.venv|\.pre-commit-cache)(/|$)

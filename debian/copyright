@@ -1,0 +1,38 @@
+Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
+Upstream-Name: php-pinba
+Upstream-Contact: Oleg Ekhlakov <o.ekhlakov@protonmail.com>
+Source: https://github.com/XOlegator/pinba_extension
+Comment:
+ This is a maintained fork of the original Pinba PHP extension by Antony Dovgal:
+ https://github.com/tony2001/pinba_extension
+
+Files: *
+Copyright: 2009-2013 Antony Dovgal <tony@daylessday.org>
+           2012 Florian Forster <ff@octo.it>
+           2026 Oleg Ekhlakov <o.ekhlakov@protonmail.com>
+License: LGPL-2.1-or-later
+
+Files: pinba-pb-c.c pinba.pb-c.h
+Copyright: 2009-2013 Antony Dovgal <tony@daylessday.org>
+           2026 Oleg Ekhlakov <o.ekhlakov@protonmail.com>
+License: LGPL-2.1-or-later
+Comment: Generated from pinba.proto by protoc-gen-c (protobuf-c). The generated
+ bindings carry the license of the schema they are produced from.
+
+Files: debian/*
+Copyright: 2026 Oleg Ekhlakov <o.ekhlakov@protonmail.com>
+License: LGPL-2.1-or-later
+
+License: LGPL-2.1-or-later
+ This library is free software; you can redistribute it and/or modify it under
+ the terms of the GNU Lesser General Public License as published by the Free
+ Software Foundation; either version 2.1 of the License, or (at your option)
+ any later version.
+ .
+ This library is distributed in the hope that it will be useful, but WITHOUT
+ ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License for more
+ details.
+ .
+ On Debian systems, the complete text of the GNU Lesser General Public License
+ version 2.1 can be found in "/usr/share/common-licenses/LGPL-2.1".

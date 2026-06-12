@@ -1,0 +1,58 @@
+#!/usr/bin/make -f
+
+# Allow CI and per-suite Launchpad uploads to override which PHP versions are
+# built, mirroring pinba_engine's debian/pinba-ppa-build.mk pattern. A suite
+# that only ships a subset of PHP branches can drop the rest by writing
+# "PHP_VERSIONS = 8.3" into debian/php-ppa-build.mk before building.
+# Guard with wildcard (not -include): a bare -include would make Make try to
+# "remake" the missing file through the %: rule and run "dh <mk-path>".
+ifneq ($(wildcard debian/php-ppa-build.mk),)
+include debian/php-ppa-build.mk
+endif
+
+ALL_VERSIONS := 8.2 8.3 8.4 8.5
+PHP_VERSIONS ?= $(ALL_VERSIONS)
+
+# Binary packages for versions not selected are excluded from the build.
+DH_EXCLUDE := $(foreach v,$(filter-out $(PHP_VERSIONS),$(ALL_VERSIONS)),-Nphp$(v)-pinba)
+
+NPROC := $(shell nproc)
+
+%:
+	dh $@ $(DH_EXCLUDE)
+
+# The extension is built once per PHP version. phpize writes generated files
+# into the source tree, so each version gets its own copy of the (clean,
+# git-tracked) sources under debian/build-<version>.
+override_dh_auto_configure:
+
+override_dh_auto_build:
+	set -e; \
+	for v in $(PHP_VERSIONS); do \
+		echo "=== Building pinba extension for PHP $$v ==="; \
+		rm -rf debian/build-$$v; \
+		mkdir -p debian/build-$$v; \
+		tar -cf - --exclude=./debian --exclude=./.git . | tar -xf - -C debian/build-$$v; \
+		( cd debian/build-$$v && \
+		  phpize$$v && \
+		  ./configure --with-php-config=/usr/bin/php-config$$v --enable-pinba && \
+		  make -j$(NPROC) ); \
+	done
+
+override_dh_auto_test:
+
+override_dh_auto_install:
+	set -e; \
+	for v in $(PHP_VERSIONS); do \
+		pkg=php$$v-pinba; \
+		extdir=$$(/usr/bin/php-config$$v --extension-dir); \
+		api=$$(/usr/bin/php-config$$v --phpapi); \
+		install -D -m 644 debian/build-$$v/modules/pinba.so \
+			debian/$$pkg$$extdir/pinba.so; \
+		install -D -m 644 debian/pinba.ini \
+			debian/$$pkg/etc/php/$$v/mods-available/pinba.ini; \
+		echo "php:Depends=phpapi-$$api" > debian/$$pkg.substvars; \
+	done
+
+override_dh_auto_clean:
+	rm -rf $(addprefix debian/build-,$(ALL_VERSIONS))

@@ -43,3 +43,16 @@ coverage.xml
 *.gcov
 *.gcda
 *.gcno
+
+# Editor/autotools backups
+*~
+
+# Debian packaging build artifacts (debian/rules clean removes these)
+debian/.debhelper/
+debian/files
+debian/debhelper-build-stamp
+debian/autoreconf.*
+debian/*.substvars
+debian/build-*/
+debian/php*-pinba/
+debian/php-ppa-build.mk
