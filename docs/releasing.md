@@ -14,14 +14,27 @@ This fork uses a semi-automated GitHub release flow:
 Configured via GitHub Actions and Release Please:
 
 - monitor pushes to `master`;
-- open or update a Release PR;
+- open or update a Release PR **when there is at least one release-triggering commit**;
 - calculate the next SemVer version:
   - `major`: commit or PR title with `!` or a `BREAKING CHANGE:` footer;
   - `minor`: at least one `feat`;
-  - `patch`: `fix`, `perf`, `refactor`, `docs`, `test`, `build`, `ci`, `chore`, `revert`;
+  - `patch`: `fix`, `perf`, `revert`, `deps`;
 - update `CHANGELOG.md`;
 - create a tag in the form `vX.Y.Z`;
 - create a GitHub Release after the release PR is merged.
+
+### Commits That Do Not Trigger a Release
+
+With the current Release Please configuration only "user-facing" commit types trigger a release
+(`feat`, `fix`, `perf`, `revert`, `deps`, and any breaking change). The following types are
+**not** release-triggering on their own and will not open a Release PR by themselves:
+
+- `docs`, `style`, `refactor`, `test`, `build`, `ci`, `chore`.
+
+These commits are still valid and are folded into the changelog of the next release that *is*
+triggered by a release-triggering commit — they just do not start a release on their own. For
+example, merging a lone `ci(...)` change updates `master` but leaves the released version
+unchanged until the next `feat`/`fix` lands.
 
 ## Required Project Rules
 
@@ -41,7 +54,8 @@ before merge.
 ## Release Lifecycle
 
 1. Developers merge regular PRs into `master`.
-2. The `release-please` workflow opens or updates a Release PR.
+2. The `release-please` workflow opens or updates a Release PR once `master` contains at least one
+   release-triggering commit since the last release (see "Commits That Do Not Trigger a Release").
 3. The maintainer reviews the proposed version and changelog.
 4. After the Release PR is merged, automation creates:
    - tag `vX.Y.Z`
