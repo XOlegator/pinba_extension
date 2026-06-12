@@ -52,9 +52,30 @@ before merge.
 
 - `.github/workflows/pr-title-conventional.yml`
 - `.github/workflows/release-please.yml`
+- `.github/workflows/release-assets.yml`
 - `release-please-config.json`
 - `.release-please-manifest.json`
+- `php_pinba.h` — `PHP_PINBA_VERSION` is bumped automatically on every release via the
+  `x-release-please-version` annotation (configured as a `generic` extra-file). This is the only
+  in-source version that the release system manages; `package.xml` is intentionally left out.
 - `CHANGELOG.md`
+
+## After the Release Is Published
+
+When the Release Please release PR is merged, a `vX.Y.Z` tag and GitHub Release are published.
+That publication triggers `release-assets.yml`, which:
+
+- rebuilds the extension from the exact released tag across every supported PHP branch
+  (`.github/php-versions.json`) as a final sanity check;
+- attaches a reproducible source tarball (`pinba-X.Y.Z.tar.gz`, produced with `git archive`) to
+  the GitHub Release.
+
+The workflow can also be run manually via `workflow_dispatch` with a `tag` input (for example
+`v1.2.0`) to rebuild or re-attach assets.
+
+A full Debian/Launchpad PPA build is not part of this flow yet — it depends on a `debian/` layer
+that does not exist (see `docs/packaging.md`). `release-assets.yml` is structured so a PPA job can
+be added alongside the existing ones later.
 
 ## One-Time GitHub Repository Settings
 
