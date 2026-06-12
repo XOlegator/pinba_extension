@@ -1,0 +1,112 @@
+name: release-assets
+
+# Runs after release-please publishes a GitHub Release (the release PR is merged,
+# the vX.Y.Z tag is created, and the Release is published). It re-verifies the
+# tagged tree across every supported PHP branch and attaches a source tarball to
+# the Release. A full PPA/Launchpad build is intentionally out of scope until the
+# repository gains a debian/ layer (see docs/packaging.md).
+
+on:
+  release:
+    types:
+      - published
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Release tag to build and attach assets to, e.g. v1.2.0
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+env:
+  RELEASE_REF: ${{ github.event.release.tag_name || inputs.tag }}
+
+jobs:
+  matrix:
+    name: Resolve support matrix
+    runs-on: ubuntu-latest
+    outputs:
+      php-versions: ${{ steps.read-matrix.outputs.php-versions }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ env.RELEASE_REF }}
+
+      - name: Read PHP support matrix
+        id: read-matrix
+        run: echo "php-versions=$(jq -c '.targets.php' .github/php-versions.json)" >> "$GITHUB_OUTPUT"
+
+  build:
+    needs: matrix
+    name: Build released tag / PHP ${{ matrix.php-version }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        php-version: ${{ fromJson(needs.matrix.outputs.php-versions) }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ env.RELEASE_REF }}
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php-version }}
+          coverage: none
+          tools: phpize
+
+      - name: Show toolchain
+        run: |
+          php -v
+          phpize -v
+          php-config --version
+
+      - name: Install build dependencies
+        run: |
+          sudo apt-get update -q
+          sudo apt-get install -y --no-install-recommends libprotobuf-c-dev
+
+      - name: Prepare build
+        run: phpize
+
+      - name: Configure
+        run: ./configure --enable-pinba
+
+      - name: Build
+        run: make -j"$(nproc)"
+
+      - name: Test
+        run: make test NO_INTERACTION=1 REPORT_EXIT_STATUS=1
+
+  source-tarball:
+    needs: build
+    name: Attach source tarball to release
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ env.RELEASE_REF }}
+
+      - name: Build source tarball
+        id: tarball
+        run: |
+          tag="${RELEASE_REF}"
+          version="${tag#v}"
+          archive="pinba-${version}.tar.gz"
+          git archive --prefix="pinba-${version}/" HEAD | gzip -9 > "$archive"
+          echo "archive=$archive" >> "$GITHUB_OUTPUT"
+
+      - name: Upload tarball to release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh release upload "${RELEASE_REF}" "${{ steps.tarball.outputs.archive }}" --clobber
