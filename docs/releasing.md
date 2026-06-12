@@ -67,6 +67,7 @@ before merge.
 - `.github/workflows/pr-title-conventional.yml`
 - `.github/workflows/release-please.yml`
 - `.github/workflows/release-assets.yml`
+- `.github/workflows/packaging.yml` — publishes the Debian source packages to the Launchpad PPA
 - `release-please-config.json`
 - `.release-please-manifest.json`
 - `php_pinba.h` — `PHP_PINBA_VERSION` is bumped automatically on every release via the
@@ -77,19 +78,19 @@ before merge.
 ## After the Release Is Published
 
 When the Release Please release PR is merged, a `vX.Y.Z` tag and GitHub Release are published.
-That publication triggers `release-assets.yml`, which:
+That publication triggers two workflows:
 
-- rebuilds the extension from the exact released tag across every supported PHP branch
-  (`.github/php-versions.json`) as a final sanity check;
-- attaches a reproducible source tarball (`pinba-X.Y.Z.tar.gz`, produced with `git archive`) to
-  the GitHub Release.
+- `release-assets.yml` — rebuilds the extension from the exact released tag across every supported
+  PHP branch (`.github/php-versions.json`) and attaches a reproducible source tarball
+  (`pinba-X.Y.Z.tar.gz`, produced with `git archive`) to the GitHub Release.
+- `packaging.yml` (`publish-ppa`) — builds the signed Debian **source** package for each Ubuntu
+  suite and uploads it to `ppa:xolegator/packages`, where Launchpad builds the `php<ver>-pinba`
+  binaries. See `docs/packaging.md` for the version scheme, the per-suite flow, and the required
+  one-time Launchpad setting (the PPA must depend on `ppa:ondrej/php`).
 
-The workflow can also be run manually via `workflow_dispatch` with a `tag` input (for example
-`v1.2.0`) to rebuild or re-attach assets.
-
-A full Debian/Launchpad PPA build is not part of this flow yet — it depends on a `debian/` layer
-that does not exist (see `docs/packaging.md`). `release-assets.yml` is structured so a PPA job can
-be added alongside the existing ones later.
+Both workflows can also be run manually via `workflow_dispatch` with a `tag` input (for example
+`v1.2.0`) — `packaging.yml` additionally takes `upload` (off = build + sign only, a dry run),
+`target_suite`, and `debian_revision`.
 
 ## One-Time GitHub Repository Settings
 

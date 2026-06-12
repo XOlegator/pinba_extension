@@ -90,12 +90,42 @@ This file is intended to become the source of truth for:
 
 1. [x] Add an initial `debian/` skeleton.
 2. [x] Implement package install maps for supported PHP branches (rules-driven, see above).
-3. [x] Validate the build. `package.yml` builds all four `php<ver>-pinba` binaries on Ubuntu with
-   the `ondrej/php` PPA and runs `lintian`; the build was also validated locally (`.so` loads into
+3. [x] Validate the build. `packaging.yml` (`build-debs`) builds all four `php<ver>-pinba` binaries
+   on Ubuntu with the `ondrej/php` PPA and runs `lintian`; also validated locally (`.so` loads into
    PHP 8.2–8.5 and reports the correct version).
-4. [ ] Add a source-package workflow for Launchpad uploads (GPG signing + `dput`; needs secrets).
+4. [x] Publish signed source packages to Launchpad — `packaging.yml` (`publish-ppa`), see below.
 5. [ ] Connect packaging rebuilds to the reviewed PHP discovery PR flow.
 
-Remaining considerations for step 4: per-suite PHP availability differs — the `noble` archive ships
-only `php8.3`, so building `php8.2/8.4/8.5-pinba` there requires the `ondrej/php` packages to be
-available to the Launchpad build (resolved per suite via `debian/php-ppa-build.mk`).
+## Publishing to the Launchpad PPA
+
+The `publish-ppa` job in `.github/workflows/packaging.yml` builds the Debian **source** package for
+each Ubuntu suite and uploads it to `ppa:xolegator/packages`; Launchpad then builds the binaries.
+
+- **Trigger:** automatically on a published GitHub Release, or manually via `workflow_dispatch`
+  (`tag`, `target_suite`, `upload` — `upload: false` builds + signs only, for a dry run — and
+  `debian_revision`).
+- **Version format:** `{upstream}-{revision}~{suite}1`, e.g. `1.2.0-1~noble1`, `1.2.0-1~resolute1`.
+  The `~{suite}` keeps a PPA build sorting below a hypothetical archive upload and orders newer
+  Ubuntu suites above older ones.
+- **Per suite:** `debian/php-ppa-build.mk` is generated with the suite's `PHP_VERSIONS`, the
+  changelog is `dch`-rewritten, the orig tarball is made once with `git archive` (first suite uses
+  `-sa`, the rest `-sd`), the `.changes` is signed with the Launchpad GPG key (loopback pinentry)
+  and `dput`-uploaded over FTP (`passive_ftp = 1`, for runner NAT) with a retry loop. Uploads are
+  sequential so the orig lands before any `-sd` upload references it.
+- **Secrets used:** `LAUNCHPAD_GPG_PRIVATE_KEY`, `LAUNCHPAD_GPG_PASSPHRASE`, `LAUNCHPAD_GPG_FINGERPRINT`.
+
+### Required one-time Launchpad setting
+
+The Launchpad build farm must be able to resolve `php8.2/8.4/8.5-dev`. The Ubuntu `noble` archive
+ships only `php8.3`, so the **PPA itself must depend on `ppa:ondrej/php`**:
+
+> Launchpad → the PPA → *Edit PPA dependencies* → add `ppa:ondrej/php`.
+
+Without this, only the PHP version present in the target suite's archive will build. If a suite ever
+genuinely lacks a version, drop it from that suite in `.github/packaging-matrix.json` (the job reads
+its `PHP_VERSIONS` from there per suite).
+
+### After upload
+
+Launchpad needs a few minutes to build; the PPA signing key can take 5–30 minutes to propagate on
+the first publish, so `add-apt-repository` may briefly return a key error — wait and retry.
