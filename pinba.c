@@ -127,10 +127,10 @@ typedef struct _pinba_timer { /* {{{ */
 } pinba_timer_t;
 /* }}} */
 
-#define PHP_ZVAL_TO_TIMER(zval, timer)                                                        \
-  timer = (pinba_timer_t *)zend_fetch_resource(Z_RES_P(zval), "pinba timer", le_pinba_timer); \
-  if (!timer) {                                                                               \
-    RETURN_FALSE;                                                                             \
+#define PHP_ZVAL_TO_TIMER(zval, timer)                                                          \
+  timer = (pinba_timer_t *)zend_fetch_resource(Z_RES_P((zval)), "pinba timer", le_pinba_timer); \
+  if (!(timer)) {                                                                               \
+    RETURN_FALSE;                                                                               \
   }
 
 static inline pinba_client_t *php_pinba_client_object(zend_object *obj) {
@@ -144,11 +144,11 @@ static inline pinba_client_t *php_pinba_client_object(zend_object *obj) {
     (a)->tv_sec = (b)->tv_sec;   \
     (a)->tv_usec = (b)->tv_usec; \
   } while (0);
-#define timeval_to_float(t) (float)(t).tv_sec + (float)(t).tv_usec / 1000000.0
-#define float_to_timeval(f, t)                                 \
-  do {                                                         \
-    (t).tv_sec = (int)(f);                                     \
-    (t).tv_usec = (int)((f - (double)(t).tv_sec) * 1000000.0); \
+#define timeval_to_float(t) ((float)(t).tv_sec + (float)(t).tv_usec / 1000000.0)
+#define float_to_timeval(f, t)                                   \
+  do {                                                           \
+    (t).tv_sec = (int)(f);                                       \
+    (t).tv_usec = (int)(((f) - (double)(t).tv_sec) * 1000000.0); \
   } while (0);
 
 #ifndef timersub
@@ -600,7 +600,6 @@ static inline Pinba__Request *php_create_pinba_packet(pinba_client_t *client,
   char hostname[256], *tag_value;
   pinba_req_data *req_data = &PINBA_G(tmp_req_data);
   int timers_num, tags_cnt, *tag_ids = NULL, *tag_value_ids = NULL, i, n;
-  size_t id;
 
   request = malloc(sizeof(Pinba__Request));
   if (!request) {
@@ -834,8 +833,7 @@ static inline Pinba__Request *php_create_pinba_packet(pinba_client_t *client,
 
   n = 0;
   for (zend_hash_internal_pointer_reset_ex(&dict, &pos);
-       (id = (size_t)zend_hash_get_current_data_ex(&dict, &pos) != 0);
-       zend_hash_move_forward_ex(&dict, &pos)) {
+       zend_hash_get_current_data_ex(&dict, &pos) != NULL; zend_hash_move_forward_ex(&dict, &pos)) {
     zend_string *str;
     zend_ulong num_key;
 

@@ -7,18 +7,18 @@ encodes request data with protobuf, and sends UDP packets to Pinba Engine.
 
 This repository is an actively maintained fork of the original project:
 
-- Original upstream: https://github.com/tony2001/pinba_extension
-- Active fork: https://github.com/XOlegator/pinba_extension
+- Original upstream: <https://github.com/tony2001/pinba_extension>
+- Active fork: <https://github.com/XOlegator/pinba_extension>
 
 ## Related Knowledge Base
 
 Before any non-trivial task, review the shared Pinba knowledge base from the sibling project:
 
-1. https://github.com/XOlegator/pinba_engine/blob/master/knowledge/SCHEMA.md
-2. https://github.com/XOlegator/pinba_engine/blob/master/knowledge/wiki/index.md
-3. https://github.com/XOlegator/pinba_engine/blob/master/knowledge/wiki/overview.md
+1. <https://github.com/XOlegator/pinba_engine/blob/master/knowledge/SCHEMA.md>
+2. <https://github.com/XOlegator/pinba_engine/blob/master/knowledge/wiki/index.md>
+3. <https://github.com/XOlegator/pinba_engine/blob/master/knowledge/wiki/overview.md>
 4. Relevant concept pages from:
-   - https://github.com/XOlegator/pinba_engine/tree/master/knowledge/wiki/concepts
+   - <https://github.com/XOlegator/pinba_engine/tree/master/knowledge/wiki/concepts>
    - especially `php-pinba-configuration.md`, `pinba-data-flow.md`,
      `pinba-udp-protocol.md`, `github-actions-ppa.md`, and `debian-ppa-packaging.md`
 

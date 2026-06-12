@@ -19,7 +19,7 @@ body:
     id: php_version
     attributes:
       label: PHP Version
-      description: Example: 8.4.22
+      description: "Example: 8.4.22"
       placeholder: 8.4.22
     validations:
       required: true
