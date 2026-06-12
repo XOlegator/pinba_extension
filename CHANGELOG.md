@@ -4,6 +4,13 @@ All notable changes in this fork are tracked here by release automation.
 
 Historical upstream release notes are preserved in `NEWS` and `docs/legacy-news.md`.
 
+## [1.2.1](https://github.com/XOlegator/pinba_extension/compare/v1.2.0...v1.2.1) (2026-06-12)
+
+
+### Bug Fixes
+
+* **serialization:** prevent buffer leak when realloc fails ([#23](https://github.com/XOlegator/pinba_extension/issues/23)) ([3f46928](https://github.com/XOlegator/pinba_extension/commit/3f469281f345deafc6b624bff56ab5c0bc06835a))
+
 ## [1.2.0](https://github.com/XOlegator/pinba_extension/compare/v1.1.2...v1.2.0) (2026-06-07)
 
 
