@@ -10,7 +10,7 @@ Build-Depends:
  php8.5-dev,
  libprotobuf-c-dev,
  pkgconf
-Standards-Version: 4.6.2
+Standards-Version: 4.7.0
 Homepage: https://github.com/XOlegator/pinba_extension
 Vcs-Git: https://github.com/XOlegator/pinba_extension.git
 Vcs-Browser: https://github.com/XOlegator/pinba_extension

@@ -1,0 +1,270 @@
+name: packaging
+
+# Two responsibilities:
+#   build-debs  — on every packaging-relevant change, build the per-version
+#                 php<X.Y>-pinba binaries on Ubuntu (with ondrej/php) and lint
+#                 them, as a regression guard.
+#   publish-ppa — on a published GitHub Release (or manual dispatch), build the
+#                 signed Debian *source* package for each Ubuntu suite and upload
+#                 it to ppa:xolegator/packages. Launchpad then builds the
+#                 binaries. The Launchpad build farm resolves php<X.Y>-dev from
+#                 the Ubuntu archive plus the ondrej/php PPA, which must be added
+#                 as a build dependency of the PPA (see docs/packaging.md).
+
+on:
+  push:
+    branches:
+      - master
+    paths:
+      - 'debian/**'
+      - 'config.m4'
+      - '**.c'
+      - '**.h'
+      - 'pinba.proto'
+      - '.github/packaging-matrix.json'
+      - '.github/workflows/packaging.yml'
+  pull_request:
+    branches:
+      - master
+    paths:
+      - 'debian/**'
+      - 'config.m4'
+      - '**.c'
+      - '**.h'
+      - 'pinba.proto'
+      - '.github/packaging-matrix.json'
+      - '.github/workflows/packaging.yml'
+  release:
+    types:
+      - published
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Git tag to package and upload, e.g. v1.2.0
+        required: true
+        type: string
+      target_suite:
+        description: Limit the upload to one Ubuntu suite or do all
+        required: false
+        default: all
+        type: choice
+        options:
+          - all
+          - noble
+          - resolute
+      upload:
+        description: Upload the signed source package to Launchpad (off = build + sign only)
+        required: false
+        default: false
+        type: boolean
+      debian_revision:
+        description: Debian revision number used in the version string
+        required: false
+        default: '1'
+        type: string
+
+concurrency:
+  group: packaging-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+permissions:
+  contents: read
+
+jobs:
+  build-debs:
+    name: Build Debian packages
+    if: github.event_name == 'push' || github.event_name == 'pull_request'
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Add ondrej/php PPA and install build tooling
+        run: |
+          sudo apt-get update -q
+          sudo apt-get install -y --no-install-recommends software-properties-common
+          sudo add-apt-repository -y ppa:ondrej/php
+          sudo apt-get update -q
+          sudo apt-get install -y --no-install-recommends \
+            build-essential \
+            debhelper \
+            devscripts \
+            fakeroot \
+            lintian \
+            pkgconf \
+            libprotobuf-c-dev \
+            php8.2-dev \
+            php8.3-dev \
+            php8.4-dev \
+            php8.5-dev
+
+      - name: Build orig tarball
+        run: |
+          upstream="$(dpkg-parsechangelog -S Version | sed 's/-[^-]*$//')"
+          echo "Upstream version: $upstream"
+          git archive --prefix="php-pinba-${upstream}/" HEAD \
+            | gzip -9 > "../php-pinba_${upstream}.orig.tar.gz"
+
+      - name: Build binary packages
+        run: dpkg-buildpackage -b -us -uc
+
+      - name: Run lintian
+        run: lintian --fail-on error ../php-pinba_*_amd64.changes
+
+      - name: Collect packages
+        run: |
+          mkdir -p dist
+          mv ../php8.*-pinba_*.deb dist/
+          mv ../php8.*-pinba-dbgsym_*.ddeb dist/ 2>/dev/null || true
+
+      - name: Show package contents
+        run: |
+          for deb in dist/php8.*-pinba_*.deb; do
+            echo "=== $deb ==="
+            dpkg -c "$deb" | grep -E 'pinba\.(so|ini)'
+            dpkg -I "$deb" | grep -E 'Package:|Depends:'
+          done
+
+      - name: Upload package artifacts
+        uses: actions/upload-artifact@v7
+        with:
+          name: debian-packages
+          path: dist/*
+          if-no-files-found: error
+          retention-days: 14
+
+  publish-ppa:
+    name: Publish source packages to Launchpad
+    if: github.event_name == 'release' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+    env:
+      DEBEMAIL: o.ekhlakov@protonmail.com
+      DEBFULLNAME: Oleg Ekhlakov
+      PPA_DPUT_NAME: xolegator-packages
+      RELEASE_TAG: ${{ github.event.release.tag_name || inputs.tag }}
+      TARGET_SUITE: ${{ inputs.target_suite || 'all' }}
+      DEB_REVISION: ${{ inputs.debian_revision || '1' }}
+      DO_UPLOAD: ${{ github.event_name == 'release' && 'true' || inputs.upload }}
+    steps:
+      - name: Checkout release tag
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ github.event.release.tag_name || inputs.tag }}
+
+      - name: Install packaging and upload tooling
+        run: |
+          sudo apt-get update -q
+          sudo apt-get install -y --no-install-recommends \
+            debhelper \
+            devscripts \
+            dput \
+            fakeroot \
+            gnupg \
+            jq \
+            lintian
+
+      - name: Import Launchpad GPG key
+        env:
+          LAUNCHPAD_GPG_PRIVATE_KEY: ${{ secrets.LAUNCHPAD_GPG_PRIVATE_KEY }}
+        run: |
+          export GNUPGHOME="$RUNNER_TEMP/gnupg"
+          echo "GNUPGHOME=$GNUPGHOME" >> "$GITHUB_ENV"
+          mkdir -p "$GNUPGHOME"
+          chmod 700 "$GNUPGHOME"
+          printf 'allow-loopback-pinentry\n' > "$GNUPGHOME/gpg-agent.conf"
+          printf '%s' "$LAUNCHPAD_GPG_PRIVATE_KEY" | base64 -d | gpg --batch --import
+          gpg --batch --list-secret-keys --keyid-format LONG
+
+      - name: Configure dput
+        run: |
+          cat > ~/.dput.cf <<'EOF'
+          [xolegator-packages]
+          fqdn = ppa.launchpad.net
+          method = ftp
+          incoming = ~xolegator/packages/ubuntu/
+          login = anonymous
+          allow_unsigned_uploads = 0
+          passive_ftp = 1
+          EOF
+
+      - name: Build, sign and upload source packages
+        env:
+          LAUNCHPAD_GPG_FINGERPRINT: ${{ secrets.LAUNCHPAD_GPG_FINGERPRINT }}
+          LAUNCHPAD_GPG_PASSPHRASE: ${{ secrets.LAUNCHPAD_GPG_PASSPHRASE }}
+        run: |
+          set -euo pipefail
+
+          upstream="${RELEASE_TAG#v}"
+          echo "Upstream version: $upstream  (revision $DEB_REVISION, upload=$DO_UPLOAD)"
+
+          # Non-interactive debsign wrapper: gpg with loopback pinentry.
+          wrapper="$RUNNER_TEMP/debsign-gpg-wrapper"
+          cat > "$wrapper" <<'EOF'
+          #!/bin/sh
+          exec gpg --batch --yes --pinentry-mode loopback \
+            --passphrase "$LAUNCHPAD_GPG_PASSPHRASE" "$@"
+          EOF
+          chmod +x "$wrapper"
+
+          suites=$(jq -r '.suites | keys[]' .github/packaging-matrix.json)
+          first=1
+          for suite in $suites; do
+            if [ "$TARGET_SUITE" != "all" ] && [ "$TARGET_SUITE" != "$suite" ]; then
+              echo "Skipping $suite (target is $TARGET_SUITE)"
+              continue
+            fi
+
+            versions=$(jq -r --arg s "$suite" '.suites[$s].php_versions | join(" ")' \
+              .github/packaging-matrix.json)
+            full="${upstream}-${DEB_REVISION}~${suite}1"
+            changes="../php-pinba_${full}_source.changes"
+            echo "::group::Build $suite ($full) — PHP: $versions"
+
+            # Fresh changelog seed + suite-specific top entry and version.
+            git checkout -- debian/changelog
+            echo "PHP_VERSIONS = $versions" > debian/php-ppa-build.mk
+            dch --force-distribution --distribution "$suite" --newversion "$full" \
+              "Automated PPA build for Ubuntu $suite."
+
+            # First processed suite carries the orig tarball (-sa); the rest
+            # reference it (-sd) since Launchpad already has it.
+            if [ "$first" = "1" ]; then
+              git archive --prefix="php-pinba-${upstream}/" HEAD \
+                | gzip -9 > "../php-pinba_${upstream}.orig.tar.gz"
+              sa_flag="-sa"
+            else
+              sa_flag="-sd"
+            fi
+
+            dpkg-buildpackage -S "$sa_flag" -us -uc -d
+            lintian --fail-on error "$changes"
+            debsign --no-re-sign -p"$wrapper" -k"$LAUNCHPAD_GPG_FINGERPRINT" "$changes"
+
+            if [ "$DO_UPLOAD" = "true" ]; then
+              for attempt in 1 2 3; do
+                if dput "$PPA_DPUT_NAME" "$changes"; then
+                  echo "Uploaded $suite"
+                  break
+                fi
+                if [ "$attempt" -lt 3 ]; then
+                  echo "dput attempt $attempt failed, retrying in 30s..."
+                  sleep 30
+                else
+                  echo "dput failed for $suite after 3 attempts" >&2
+                  exit 1
+                fi
+              done
+            else
+              echo "upload=false — built and signed $suite, skipping dput"
+            fi
+
+            # Clean this suite's artifacts so the next suite's globs stay
+            # unambiguous (keep the shared orig tarball in place for -sd suites).
+            rm -f "../php-pinba_${full}"_source.* \
+                  "../php-pinba_${full}.dsc" \
+                  "../php-pinba_${full}.debian.tar."*
+            first=0
+            echo "::endgroup::"
+          done
