@@ -15,9 +15,6 @@
     "resolute": {
       "ubuntu_version": "26.04",
       "php_versions": [
-        "8.2",
-        "8.3",
-        "8.4",
         "8.5"
       ]
     }
@@ -25,6 +22,8 @@
   "binary_package_template": "php{php_version}-pinba",
   "notes": [
     "A discovered PHP branch is not enabled for packaging automatically until CI is green.",
-    "Launchpad builds should be driven by distro-specific source uploads and reviewed PRs."
+    "Launchpad builds should be driven by distro-specific source uploads and reviewed PRs.",
+    "php_versions per suite must be the PHP versions actually installable on the Launchpad build farm for that suite. noble (24.04) gets 8.2-8.5 via the ondrej/php PPA dependency; resolute (26.04) gets only 8.5 because the 26.04 archive ships only php8.5 and ondrej/php has no resolute series.",
+    "The publish workflow regenerates debian/control Build-Depends per suite from these php_versions, so each suite only build-depends on the php<ver>-dev it can install."
   ]
 }

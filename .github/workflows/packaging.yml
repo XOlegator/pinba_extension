@@ -222,9 +222,23 @@ jobs:
             changes="../php-pinba_${full}_source.changes"
             echo "::group::Build $suite ($full) — PHP: $versions"
 
-            # Fresh changelog seed + suite-specific top entry and version.
-            git checkout -- debian/changelog
+            # Fresh changelog + control seed, then suite-specific overrides.
+            git checkout -- debian/changelog debian/control
             echo "PHP_VERSIONS = $versions" > debian/php-ppa-build.mk
+
+            # Restrict Build-Depends to the PHP versions installable on this
+            # suite's build farm (php-ppa-build.mk already drops the binaries for
+            # the rest). Without this the source package build-depends on
+            # php<ver>-dev that the suite cannot provide and stays in
+            # "Dependency wait" on Launchpad — e.g. resolute (26.04) only ships
+            # php8.5 and ondrej/php has no resolute series.
+            read -ra suite_versions <<< "$versions"
+            bd=$(printf ' php%s-dev,\n' "${suite_versions[@]}")
+            awk -v bd="$bd" '
+              /^ php[0-9]+\.[0-9]+-dev,/ { if (!seen) { printf "%s\n", bd; seen=1 } next }
+              { print }
+            ' debian/control > debian/control.tmp && mv debian/control.tmp debian/control
+
             dch --force-distribution --distribution "$suite" --newversion "$full" \
               "Automated PPA build for Ubuntu $suite."
 
