@@ -37,7 +37,7 @@ extern zend_module_entry pinba_module_entry;
 
 #define PINBA_COLLECTOR_DEFAULT_PORT "30002"
 #define PINBA_COLLECTORS_MAX 8
-#define PHP_PINBA_VERSION "1.2.0" /* x-release-please-version */
+#define PHP_PINBA_VERSION "1.2.1" /* x-release-please-version */
 
 typedef struct _pinba_req_data { /* {{{ */
   char *server_name;
