@@ -1,0 +1,9 @@
+php-pinba (1.2.0-1~noble1) noble; urgency=medium
+
+  * Initial Debian packaging for the fork.
+  * Build the pinba extension for PHP 8.2, 8.3, 8.4 and 8.5 as separate
+    php<version>-pinba binary packages.
+  * Install the extension into each PHP extension_dir and ship a
+    mods-available/pinba.ini enabled via phpenmod.
+
+ -- Oleg Ekhlakov <o.ekhlakov@protonmail.com>  Fri, 12 Jun 2026 00:00:00 +0000
