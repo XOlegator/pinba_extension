@@ -114,16 +114,26 @@ each Ubuntu suite and uploads it to `ppa:xolegator/packages`; Launchpad then bui
   sequential so the orig lands before any `-sd` upload references it.
 - **Secrets used:** `LAUNCHPAD_GPG_PRIVATE_KEY`, `LAUNCHPAD_GPG_PASSPHRASE`, `LAUNCHPAD_GPG_FINGERPRINT`.
 
-### Required one-time Launchpad setting
+### Per-suite PHP availability
 
-The Launchpad build farm must be able to resolve `php8.2/8.4/8.5-dev`. The Ubuntu `noble` archive
-ships only `php8.3`, so the **PPA itself must depend on `ppa:ondrej/php`**:
+The Launchpad build farm can only build a `php<ver>-pinba` package for a suite where `php<ver>-dev`
+is installable on that suite. This differs by suite, so each suite's `php_versions` in
+`.github/packaging-matrix.json` must list exactly what is available there:
 
-> Launchpad → the PPA → *Edit PPA dependencies* → add `ppa:ondrej/php`.
+| Suite | Ubuntu | Available `php<ver>-dev` | Source |
+|-------|--------|--------------------------|--------|
+| `noble` | 24.04 | 8.2, 8.3, 8.4, 8.5 | `ondrej/php` PPA dependency (the archive alone has only 8.3) |
+| `resolute` | 26.04 | 8.5 | the 26.04 archive (ondrej/php has **no** resolute series) |
 
-Without this, only the PHP version present in the target suite's archive will build. If a suite ever
-genuinely lacks a version, drop it from that suite in `.github/packaging-matrix.json` (the job reads
-its `PHP_VERSIONS` from there per suite).
+**Required one-time Launchpad setting** (for `noble`): the **PPA must depend on `ppa:ondrej/php`** —
+Launchpad → the PPA → *Edit PPA dependencies* → add `ppa:ondrej/php`. ondrej only publishes `jammy`
+and `noble`, which is why `resolute` falls back to the 26.04 archive's single php (8.5).
+
+The publish workflow enforces this automatically: for each suite it regenerates
+`debian/control` `Build-Depends` and the built binary set from that suite's `php_versions`, so a
+suite never build-depends on a `php<ver>-dev` it cannot install (which would otherwise leave the
+build in Launchpad "Dependency wait" forever). When a new suite gains more PHP versions (e.g. once
+ondrej adds a resolute series), just extend its `php_versions` here.
 
 ### After upload
 
