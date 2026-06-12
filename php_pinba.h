@@ -21,7 +21,7 @@
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
-*/
+ */
 
 #ifndef PHP_PINBA_H
 #define PHP_PINBA_H
@@ -40,55 +40,54 @@ extern zend_module_entry pinba_module_entry;
 #define PHP_PINBA_VERSION "1.2.0" /* x-release-please-version */
 
 typedef struct _pinba_req_data { /* {{{ */
-	char *server_name;
-	char *script_name;
-	size_t req_count;
-	size_t doc_size;
-	size_t  mem_peak_usage;
-	struct timeval req_start;
-	struct timeval req_time;
-	struct timeval ru_utime;
-	struct timeval ru_stime;
-	size_t memory_footprint;
+  char *server_name;
+  char *script_name;
+  size_t req_count;
+  size_t doc_size;
+  size_t mem_peak_usage;
+  struct timeval req_start;
+  struct timeval req_time;
+  struct timeval ru_utime;
+  struct timeval ru_stime;
+  size_t memory_footprint;
 } pinba_req_data;
 /* }}} */
 
 typedef struct {
-	int fd;
-	struct sockaddr_storage sockaddr;
-	size_t                  sockaddr_len; /* shouldn't this be socken_t ? */
-	time_t                  sockaddr_time; /* time last resolved */
+  int fd;
+  struct sockaddr_storage sockaddr;
+  size_t sockaddr_len;  /* shouldn't this be socken_t ? */
+  time_t sockaddr_time; /* time last resolved */
 } pinba_sockaddr;
 
 typedef struct _pinba_collector {
-	char *host;
-	char *port;
+  char *host;
+  char *port;
 } pinba_collector;
 
 ZEND_BEGIN_MODULE_GLOBALS(pinba) /* {{{ */
-	pinba_collector collectors[PINBA_COLLECTORS_MAX];
-	unsigned int n_collectors; /* number of collectors we got from ini file */
-	char *collector_address; /* this is a lil broken, contains last address only */
-	char host_name[128];
-	char schema[17];
-	char *server_name;
-	char *script_name;
-	double request_time;
-	HashTable timers;
-	HashTable tags;
-	pinba_req_data tmp_req_data;
-	bool timers_stopped;
-	bool in_rshutdown;
-	bool enabled;
-	bool auto_flush;
-	time_t resolve_interval; /* seconds */
+pinba_collector collectors[PINBA_COLLECTORS_MAX];
+unsigned int n_collectors; /* number of collectors we got from ini file */
+char *collector_address;   /* this is a lil broken, contains last address only */
+char host_name[128];
+char schema[17];
+char *server_name;
+char *script_name;
+double request_time;
+HashTable timers;
+HashTable tags;
+pinba_req_data tmp_req_data;
+bool timers_stopped;
+bool in_rshutdown;
+bool enabled;
+bool auto_flush;
+time_t resolve_interval; /* seconds */
 ZEND_END_MODULE_GLOBALS(pinba)
 /* }}} */
 
 #define PINBA_G(v) ZEND_MODULE_GLOBALS_ACCESSOR(pinba, v)
 
-#endif	/* PHP_PINBA_H */
-
+#endif /* PHP_PINBA_H */
 
 /*
  * Local variables:

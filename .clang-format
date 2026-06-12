@@ -1,0 +1,13 @@
+---
+# Shared house style with the sibling pinba_engine repository.
+# C extension — Google base, 100-column, 2-space indent, no tabs.
+# Generated protobuf-c bindings (pinba-pb-c.c / pinba.pb-c.h) are excluded
+# from formatting in CI; do not run clang-format on them.
+Language: Cpp
+BasedOnStyle: Google
+Standard: c++17
+ColumnLimit: 100
+IndentWidth: 2
+TabWidth: 2
+UseTab: Never
+---
