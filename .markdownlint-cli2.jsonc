@@ -3,6 +3,9 @@
     "MD013": false
   },
   "ignores": [
-    "docs/internal/**/*.md"
+    "docs/internal/**/*.md",
+    "docs/legacy-news.md",
+    "CHANGELOG.md",
+    ".github/**/*.md"
   ]
 }

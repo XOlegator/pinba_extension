@@ -1,0 +1,71 @@
+# Single source of truth for linting, run both locally and in CI
+# (`pre-commit run --all-files`). Heavy hooks (clang-tidy) are pre-push only.
+#
+# Generated protobuf-c bindings and preserved legacy upstream notes are never
+# touched by these hooks.
+exclude: |
+  (?x)^(
+    pinba-pb-c\.c|
+    pinba\.pb-c\.h|
+    NEWS|
+    docs/legacy-news\.md
+  )$
+
+default_install_hook_types: [pre-commit, pre-push]
+
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v6.0.0
+    hooks:
+      - id: trailing-whitespace
+        exclude: '\.(phpt|diff|exp|out)$'
+      - id: end-of-file-fixer
+        exclude: '\.(phpt|diff|exp|out)$'
+      - id: mixed-line-ending
+        args: [--fix=lf]
+      - id: check-yaml
+        exclude: '^\.clang-(format|tidy)$'
+      - id: check-json
+      - id: check-added-large-files
+        args: [--maxkb=512]
+      - id: check-merge-conflict
+      - id: check-case-conflict
+      - id: check-executables-have-shebangs
+      - id: check-shebang-scripts-are-executable
+      - id: detect-private-key
+
+  - repo: https://github.com/codespell-project/codespell
+    rev: v2.4.2
+    hooks:
+      - id: codespell
+        exclude: '\.(phpt|diff|exp|out)$|^CHANGELOG\.md$'
+
+  - repo: https://github.com/rhysd/actionlint
+    rev: v1.7.12
+    hooks:
+      - id: actionlint
+
+  - repo: https://github.com/DavidAnson/markdownlint-cli2
+    rev: v0.22.1
+    hooks:
+      - id: markdownlint-cli2
+
+  - repo: https://github.com/shellcheck-py/shellcheck-py
+    rev: v0.11.0.1
+    hooks:
+      - id: shellcheck
+
+  - repo: local
+    hooks:
+      - id: clang-format
+        name: clang-format (C)
+        language: system
+        entry: clang-format --dry-run --Werror
+        files: '^(pinba\.c|php_pinba\.h)$'
+      - id: clang-tidy
+        name: clang-tidy (C)
+        language: system
+        entry: tools/run-clang-tidy.sh
+        files: '^(pinba\.c|php_pinba\.h)$'
+        pass_filenames: false
+        stages: [pre-push]
