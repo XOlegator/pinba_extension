@@ -1,7 +1,11 @@
 # Pinba Extension (Modernization Fork)
 
 [![CI](https://github.com/XOlegator/pinba_extension/actions/workflows/ci.yml/badge.svg)](https://github.com/XOlegator/pinba_extension/actions/workflows/ci.yml)
+[![Lint](https://github.com/XOlegator/pinba_extension/actions/workflows/lint.yml/badge.svg)](https://github.com/XOlegator/pinba_extension/actions/workflows/lint.yml)
 [![codecov](https://codecov.io/gh/XOlegator/pinba_extension/branch/master/graph/badge.svg)](https://codecov.io/gh/XOlegator/pinba_extension)
+[![Release](https://img.shields.io/github/v/release/XOlegator/pinba_extension)](https://github.com/XOlegator/pinba_extension/releases/latest)
+[![PHP](https://img.shields.io/badge/PHP-8.2%20%7C%208.3%20%7C%208.4%20%7C%208.5-777BB4?logo=php&logoColor=white)](https://github.com/XOlegator/pinba_extension/blob/master/.github/php-versions.json)
+[![License: LGPL-2.1](https://img.shields.io/github/license/XOlegator/pinba_extension)](https://github.com/XOlegator/pinba_extension/blob/master/COPYING)
 
 Pinba Extension is the PHP client extension for the Pinba monitoring stack. It collects timing
 and request metrics inside PHP, serializes them with protobuf, and sends them over UDP to
