@@ -39,7 +39,7 @@ extern zend_module_entry pinba_module_entry;
 #define PINBA_COLLECTORS_MAX 8
 #define PINBA_HOST_NAME_SIZE 128  /* buffer for the local hostname, incl. NUL */
 #define PINBA_SCHEMA_SIZE 17      /* buffer for the request schema, incl. NUL */
-#define PHP_PINBA_VERSION "1.2.3" /* x-release-please-version */
+#define PHP_PINBA_VERSION "1.3.0" /* x-release-please-version */
 
 typedef struct _pinba_req_data { /* {{{ */
   char *server_name;

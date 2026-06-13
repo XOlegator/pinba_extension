@@ -5,6 +5,13 @@ All notable changes in this fork are tracked here by release automation.
 Historical upstream release notes are preserved in `docs/legacy-news.md` (curated) and
 `docs/legacy-upstream-news.md` (verbatim upstream `NEWS`).
 
+## [1.3.0](https://github.com/XOlegator/pinba_extension/compare/v1.2.3...v1.3.0) (2026-06-13)
+
+
+### Features
+
+* **pie:** support installation via PIE and Packagist ([#35](https://github.com/XOlegator/pinba_extension/issues/35)) ([13e14d4](https://github.com/XOlegator/pinba_extension/commit/13e14d46c0a9f7aad09fe0b409a509314000d2ca))
+
 ## [1.2.3](https://github.com/XOlegator/pinba_extension/compare/v1.2.2...v1.2.3) (2026-06-13)
 
 
