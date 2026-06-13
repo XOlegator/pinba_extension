@@ -4,6 +4,7 @@
 [![Lint](https://github.com/XOlegator/pinba_extension/actions/workflows/lint.yml/badge.svg)](https://github.com/XOlegator/pinba_extension/actions/workflows/lint.yml)
 [![codecov](https://codecov.io/gh/XOlegator/pinba_extension/branch/master/graph/badge.svg)](https://codecov.io/gh/XOlegator/pinba_extension)
 [![Release](https://img.shields.io/github/v/release/XOlegator/pinba_extension)](https://github.com/XOlegator/pinba_extension/releases/latest)
+[![Packagist](https://img.shields.io/packagist/v/xolegator/pinba_extension?logo=packagist&logoColor=white)](https://packagist.org/packages/xolegator/pinba_extension)
 [![PHP](https://img.shields.io/badge/PHP-8.2%20%7C%208.3%20%7C%208.4%20%7C%208.5-777BB4?logo=php&logoColor=white)](https://github.com/XOlegator/pinba_extension/blob/master/.github/php-versions.json)
 [![License: LGPL-2.1](https://img.shields.io/github/license/XOlegator/pinba_extension)](https://github.com/XOlegator/pinba_extension/blob/master/COPYING)
 
@@ -122,7 +123,8 @@ RUN printf "pinba.enabled=1\npinba.server=pinba-engine:30002\n" \
 you may `apt-get purge $PHPIZE_DEPS` afterwards, but keep the runtime `libprotobuf-c1`.
 
 **PIE (PHP Installer for Extensions)** — this repository ships [PIE](https://github.com/php/pie)
-metadata (`composer.json` with `"type": "php-ext"`), so once it is published the extension can be
+metadata (`composer.json` with `"type": "php-ext"`) and is published to
+[Packagist](https://packagist.org/packages/xolegator/pinba_extension), so the extension can be
 installed cross-platform with:
 
 ```bash
