@@ -177,6 +177,25 @@ static inline pinba_client_t *php_pinba_client_object(zend_object *obj) {
 
 static int php_pinba_key_compare(Bucket *a, Bucket *b);
 
+#define PINBA_ERRBUF_SIZE 128 /* scratch buffer for thread-safe strerror_r */
+
+/* Thread-safe strerror: writes the message for `errnum` into `buf` and returns a
+ * pointer to a valid string. Plain strerror() shares a process-global buffer and
+ * races under a ZTS (threaded) PHP SAPI. The preprocessor condition mirrors the
+ * one glibc's <string.h> uses to choose between the GNU (char *) and the
+ * XSI/POSIX (int) strerror_r prototypes, so it is correct on glibc, musl and the
+ * BSDs alike. */
+static const char *pinba_strerror(int errnum, char *buf, size_t buflen) {
+#if defined(__GLIBC__) && defined(_GNU_SOURCE)
+  return strerror_r(errnum, buf, buflen);
+#else
+  if (strerror_r(errnum, buf, buflen) != 0) {
+    snprintf(buf, buflen, "unknown error %d", errnum);
+  }
+  return buf;
+#endif
+}
+
 /* {{{ internal funcs */
 
 static inline pinba_collector *php_pinba_collector_add(pinba_collector *collectors,
@@ -983,8 +1002,9 @@ static inline int php_pinba_req_data_send(pinba_client_t *client, const char *cu
 
       sent = sendto(sa->fd, data, data_len, 0, (struct sockaddr *)&sa->sockaddr, sa->sockaddr_len);
       if (sent < data_len) {
+        char errbuf[PINBA_ERRBUF_SIZE];
         php_error_docref(NULL, E_WARNING, "failed to send data to Pinba server: %s",
-                         strerror(errno));
+                         pinba_strerror(errno, errbuf, sizeof(errbuf)));
         ret = FAILURE;
       }
     }
