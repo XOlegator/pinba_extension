@@ -4,6 +4,13 @@ All notable changes in this fork are tracked here by release automation.
 
 Historical upstream release notes are preserved in `NEWS` and `docs/legacy-news.md`.
 
+## [1.2.3](https://github.com/XOlegator/pinba_extension/compare/v1.2.2...v1.2.3) (2026-06-13)
+
+
+### Bug Fixes
+
+* **concurrency:** use thread-safe strerror_r in the send error path ([#28](https://github.com/XOlegator/pinba_extension/issues/28)) ([60c4b7e](https://github.com/XOlegator/pinba_extension/commit/60c4b7eae6a7b201c853d335abd3477a2ad21747))
+
 ## [1.2.2](https://github.com/XOlegator/pinba_extension/compare/v1.2.1...v1.2.2) (2026-06-12)
 
 
