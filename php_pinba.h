@@ -37,6 +37,8 @@ extern zend_module_entry pinba_module_entry;
 
 #define PINBA_COLLECTOR_DEFAULT_PORT "30002"
 #define PINBA_COLLECTORS_MAX 8
+#define PINBA_HOST_NAME_SIZE 128  /* buffer for the local hostname, incl. NUL */
+#define PINBA_SCHEMA_SIZE 17      /* buffer for the request schema, incl. NUL */
 #define PHP_PINBA_VERSION "1.2.1" /* x-release-please-version */
 
 typedef struct _pinba_req_data { /* {{{ */
@@ -69,8 +71,8 @@ ZEND_BEGIN_MODULE_GLOBALS(pinba) /* {{{ */
 pinba_collector collectors[PINBA_COLLECTORS_MAX];
 unsigned int n_collectors; /* number of collectors we got from ini file */
 char *collector_address;   /* this is a lil broken, contains last address only */
-char host_name[128];
-char schema[17];
+char host_name[PINBA_HOST_NAME_SIZE];
+char schema[PINBA_SCHEMA_SIZE];
 char *server_name;
 char *script_name;
 double request_time;
