@@ -1,0 +1,35 @@
+{
+    "name": "xolegator/pinba_extension",
+    "description": "Pinba PHP extension: collects request and timer metrics and ships them over UDP (protobuf) to Pinba Engine.",
+    "type": "php-ext",
+    "keywords": ["pinba", "extension", "profiling", "metrics", "monitoring", "protobuf"],
+    "homepage": "https://github.com/XOlegator/pinba_extension",
+    "license": "LGPL-2.1-or-later",
+    "authors": [
+        {
+            "name": "Antony Dovgal",
+            "homepage": "https://github.com/tony2001/pinba_extension",
+            "role": "Original author"
+        },
+        {
+            "name": "Oleg Ekhlakov",
+            "email": "o.ekhlakov@protonmail.com",
+            "homepage": "https://github.com/XOlegator/pinba_extension",
+            "role": "Fork maintainer"
+        }
+    ],
+    "support": {
+        "issues": "https://github.com/XOlegator/pinba_extension/issues",
+        "source": "https://github.com/XOlegator/pinba_extension"
+    },
+    "require": {
+        "php": ">=8.2"
+    },
+    "php-ext": {
+        "extension-name": "pinba",
+        "priority": 20,
+        "support-zts": true,
+        "support-nts": true,
+        "configure-options": []
+    }
+}

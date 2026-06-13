@@ -92,6 +92,46 @@ sudo make install
 This requires the matching `php<version>-dev` and `libprotobuf-c-dev` packages. See
 [docs/build.md](docs/build.md) for the full local build and test flow.
 
+### Docker and other distributions
+
+Outside Debian/Ubuntu the extension is built from source against the system protobuf-c runtime.
+Install the build toolchain and the protobuf-c development headers for your platform:
+
+- Debian / Ubuntu: `libprotobuf-c-dev`
+- Fedora / RHEL: `protobuf-c-devel`
+- Alpine: `protobuf-c-dev`
+
+**Docker (official PHP images)** — build and enable the extension in your image:
+
+```dockerfile
+FROM php:8.5-fpm
+
+RUN apt-get update \
+ && apt-get install -y --no-install-recommends $PHPIZE_DEPS git libprotobuf-c-dev \
+ && git clone --depth 1 https://github.com/XOlegator/pinba_extension.git /usr/src/pinba \
+ && cd /usr/src/pinba \
+ && phpize && ./configure --enable-pinba && make -j"$(nproc)" && make install \
+ && docker-php-ext-enable pinba \
+ && rm -rf /usr/src/pinba /var/lib/apt/lists/*
+
+RUN printf "pinba.enabled=1\npinba.server=pinba-engine:30002\n" \
+      > "$PHP_INI_DIR/conf.d/zz-pinba.ini"
+```
+
+`$PHPIZE_DEPS` and `$PHP_INI_DIR` are provided by the official `php` images. For a slimmer image
+you may `apt-get purge $PHPIZE_DEPS` afterwards, but keep the runtime `libprotobuf-c1`.
+
+**PIE (PHP Installer for Extensions)** — this repository ships [PIE](https://github.com/php/pie)
+metadata (`composer.json` with `"type": "php-ext"`), so once it is published the extension can be
+installed cross-platform with:
+
+```bash
+pie install xolegator/pinba_extension
+```
+
+PIE still compiles from source, so it needs the same build toolchain and `libprotobuf-c` headers
+as a manual source build.
+
 ## Development Baseline
 
 The active CI matrix builds the extension and runs the PHPT suite on `PHP 8.2`, `8.3`, `8.4`,
