@@ -72,7 +72,7 @@ before merge.
 - `.release-please-manifest.json`
 - `php_pinba.h` — `PHP_PINBA_VERSION` is bumped automatically on every release via the
   `x-release-please-version` annotation (configured as a `generic` extra-file). This is the only
-  in-source version that the release system manages; `package.xml` is intentionally left out.
+  in-source version that the release system manages.
 - `CHANGELOG.md`
 
 ## After the Release Is Published

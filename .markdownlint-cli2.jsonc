@@ -6,6 +6,7 @@
   "ignores": [
     "docs/internal/**/*.md",
     "docs/legacy-news.md",
+    "docs/legacy-upstream-news.md",
     "CHANGELOG.md",
     ".github/**/*.md"
   ]

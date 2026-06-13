@@ -52,33 +52,53 @@ Current development direction:
 - automate rebuilds when new supported PHP versions appear;
 - preserve wire compatibility with the existing Pinba protocol and ecosystem.
 
-## Current Repository State
+## Installation
 
-The repository still largely reflects the legacy PECL-era layout:
+### From the PPA (Ubuntu, recommended)
 
-- classic `config.m4` build flow;
-- legacy `README`, `NEWS`, and `package.xml` metadata;
-- one legacy PHPT test;
-- bundled protobuf runtime sources.
+Prebuilt packages are published to the
+[`ppa:xolegator/packages`](https://launchpad.net/~xolegator/+archive/ubuntu/packages) Launchpad PPA:
 
-The next phase of work is modernization around this codebase rather than a full rewrite.
+```bash
+sudo add-apt-repository ppa:xolegator/packages
+sudo apt-get update
+sudo apt-get install php8.5-pinba   # also available: php8.4-pinba, php8.3-pinba, php8.2-pinba
+```
 
-## Development Baseline
+Availability per Ubuntu release: 24.04 `noble` ships `php8.2`–`php8.5`; 26.04 `resolute` ships `php8.5`.
 
-Expected classic build flow:
+The package installs the extension and enables it (`phpenmod`). Set the runtime options in a
+drop-in such as `/etc/php/<version>/mods-available/pinba.ini` (or a separate `conf.d` file), then
+reload the SAPI:
+
+```ini
+pinba.enabled = 1
+pinba.server  = 127.0.0.1:30002
+```
+
+```bash
+sudo systemctl restart php8.5-fpm   # for FPM; CLI picks the new config up automatically
+```
+
+### From source
 
 ```bash
 phpize
 ./configure --enable-pinba
 make -j"$(nproc)"
-make test
+sudo make install
 ```
 
-The active CI matrix validates this flow on `PHP 8.2`, `8.3`, `8.4`, and `8.5`.
-Basic workflow and markdown linting are also enforced in GitHub Actions.
-The PHP matrix source of truth is stored in `.github/php-versions.json`.
-The repository also includes scheduled discovery automation that refreshes that matrix through PRs.
-Distribution packaging and deeper quality gates are the next modernization layers.
+This requires the matching `php<version>-dev` and `libprotobuf-c-dev` packages. See
+[docs/build.md](docs/build.md) for the full local build and test flow.
+
+## Development Baseline
+
+The active CI matrix builds the extension and runs the PHPT suite on `PHP 8.2`, `8.3`, `8.4`,
+and `8.5`, and enforces workflow, shell, and markdown linting plus `clang-format` and
+`clang-tidy` in GitHub Actions. The PHP matrix source of truth is `.github/php-versions.json`,
+and scheduled discovery automation refreshes it through PRs. Build-from-source steps are covered
+under [Installation](#from-source) and [docs/build.md](docs/build.md).
 
 ## Documentation
 
@@ -87,7 +107,8 @@ Distribution packaging and deeper quality gates are the next modernization layer
 - Packaging direction and package naming: [docs/packaging.md](docs/packaging.md)
 - Supported platforms and lifecycle policy: [docs/support-matrix.md](docs/support-matrix.md)
 - Release process and automatic changelog flow: [docs/releasing.md](docs/releasing.md)
-- Historical legacy release notes: [docs/legacy-news.md](docs/legacy-news.md)
+- Historical legacy release notes (curated): [docs/legacy-news.md](docs/legacy-news.md)
+- Verbatim upstream `NEWS` archive: [docs/legacy-upstream-news.md](docs/legacy-upstream-news.md)
 - Contribution guide: [CONTRIBUTING.md](CONTRIBUTING.md)
 - Security policy: [SECURITY.md](SECURITY.md)
 - Support policy: [SUPPORT.md](SUPPORT.md)
@@ -102,8 +123,8 @@ This fork uses a semi-automated GitHub release flow:
 - accepted changes are accumulated into `CHANGELOG.md` automatically;
 - release PRs, version bumps, tags, and GitHub Releases are managed by automation.
 
-Historical upstream notes remain in `NEWS` and `docs/legacy-news.md`; all new fork release
-history belongs in `CHANGELOG.md`.
+Historical upstream notes remain in `docs/legacy-news.md` and `docs/legacy-upstream-news.md`;
+all new fork release history belongs in `CHANGELOG.md`.
 
 ## License
 
@@ -115,4 +136,5 @@ Copyright:
 - 2009-2013 Antony Dovgal
 - 2026-present Oleg Ekhlakov
 
-Additional bundled third-party code notices are documented in [NOTICE](NOTICE).
+Provenance and third-party dependency notices are documented in [NOTICE](NOTICE), and project
+authorship in [AUTHORS](AUTHORS).

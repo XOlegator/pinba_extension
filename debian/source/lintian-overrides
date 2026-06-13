@@ -1,8 +1,3 @@
-# A legacy PECL package.xml is kept in the tree for historical reasons, but the
-# build deliberately does NOT use pkg-php-tools: package.xml is deprecated and
-# the extension is built with a manual per-version phpize loop (see debian/rules).
-php-pinba source: pear-package-without-pkg-php-tools-builddep
-
 # The orig tarball is produced with "git archive HEAD" (same flow as the sibling
 # pinba_engine project), so it already contains debian/; the resulting
 # .debian.tar therefore introduces no changes on top of the orig.

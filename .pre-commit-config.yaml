@@ -7,8 +7,8 @@ exclude: |
   (?x)^(
     pinba-pb-c\.c|
     pinba\.pb-c\.h|
-    NEWS|
-    docs/legacy-news\.md
+    docs/legacy-news\.md|
+    docs/legacy-upstream-news\.md
   )$
 
 default_install_hook_types: [pre-commit, pre-push]

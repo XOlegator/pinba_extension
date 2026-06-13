@@ -1,3 +1,10 @@
+<!--
+Provenance: this is the original upstream NEWS from tony2001/pinba_extension
+(https://github.com/tony2001/pinba_extension), preserved verbatim after being moved out of the
+repository root. It is the authoritative record of the pre-fork release history. A curated
+summary lives in legacy-news.md; new fork releases are tracked in ../CHANGELOG.md.
+-->
+
 Pinba 1.1.2      31 Aug 2020
 ----------------------------
 - Fixed build with PHP 7.3+
