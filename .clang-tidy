@@ -11,6 +11,19 @@
 #     returns NULL); on this code it produces only false positives.
 #   - the bugprone-* exclusions are false positives from Zend's emalloc/efree
 #     macro expansions or the established PHP-extension "_pinba_*" struct-tag idiom.
+#   - readability-identifier-length: idiomatic short C names (loop counters i/j,
+#     qsort comparator a/b, the timer t/u/sa/fd locals) plus the _i/_t/_z/_s/_p
+#     temporaries injected by Zend's ZEND_HASH_FOREACH_* macros, which are not
+#     ours to rename — pure noise on this codebase.
+#   - readability-function-cognitive-complexity: the request-packet builders and
+#     tag/timer marshalling functions are intentionally large, branch-heavy units
+#     mirroring the wire format; "fixing" them means rewriting a released
+#     extension at real risk of regression. Reported as info, not enforced here.
+#   - cert-dcl37-c / cert-dcl51-cpp: duplicate of bugprone-reserved-identifier
+#     above — they flag the same "_pinba_*" struct-tag idiom, already accepted.
+# cert-* and google-* are enabled purely as zero-cost regression guards: they
+# currently produce no findings on our files, so they only fire if a future
+# change introduces, e.g., an unchecked dangerous-API return or an unsafe cast.
 Checks: >
   -*,
   clang-analyzer-*,
@@ -22,7 +35,15 @@ Checks: >
   -bugprone-implicit-widening-of-multiplication-result,
   -bugprone-multi-level-implicit-pointer-conversion,
   -bugprone-narrowing-conversions,
-  portability-*
+  portability-*,
+  concurrency-*,
+  cert-*,
+  -cert-dcl37-c,
+  -cert-dcl51-cpp,
+  google-*,
+  readability-*,
+  -readability-identifier-length,
+  -readability-function-cognitive-complexity
 WarningsAsErrors: '*'
 HeaderFilterRegex: '(^|/)(pinba\.c|php_pinba\.h)$'
 ...

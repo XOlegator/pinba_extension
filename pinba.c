@@ -139,6 +139,10 @@ static inline pinba_client_t *php_pinba_client_object(zend_object *obj) {
 
 #define Z_PINBACLIENT_P(zv) php_pinba_client_object(Z_OBJ_P(zv))
 
+#define PINBA_USEC_PER_SEC 1000000   /* microseconds in one second */
+#define PINBA_HASHED_TAGS_CHUNK 4096 /* initial size / growth step of the hashed-tags buffer */
+#define PINBA_HOSTNAME_BUF_SIZE 256  /* scratch buffer for the request hostname */
+
 #define timeval_cvt(a, b)        \
   do {                           \
     (a)->tv_sec = (b)->tv_sec;   \
@@ -231,7 +235,8 @@ static inline void php_pinba_cleanup_collectors(pinba_collector *collectors,
 
 static inline int php_pinba_parse_server(char *address, char **host, char **port) /* {{{ */
 {
-  char *new_node, *new_service = NULL;
+  char *new_node;
+  char *new_service = NULL;
 
   *host = *port = NULL;
 
@@ -289,7 +294,8 @@ static inline int php_pinba_timer_stop(pinba_timer_t *t, struct timeval *pnow,
                                        struct rusage *pu) /* {{{ */
 {
   struct timeval now;
-  struct rusage u, tmp;
+  struct rusage u;
+  struct rusage tmp;
 
   if (!t->started) {
     return FAILURE;
@@ -376,7 +382,8 @@ static int php_pinba_tags_to_hashed_string(pinba_timer_tag_t **tags, int tags_nu
 {
   int i;
   char *buf;
-  size_t buf_len, wrote_len;
+  size_t buf_len;
+  size_t wrote_len;
 
   *hashed_tags = NULL;
   *hashed_tags_len = 0;
@@ -385,13 +392,14 @@ static int php_pinba_tags_to_hashed_string(pinba_timer_tag_t **tags, int tags_nu
     return FAILURE;
   }
 
-  buf_len = 4096;
+  buf_len = PINBA_HASHED_TAGS_CHUNK;
   wrote_len = 0;
   buf = (char *)emalloc(buf_len + 1);
 
   for (i = 0; i < tags_num; i++) {
     if (buf_len <= (wrote_len + tags[i]->name_len + 2 + tags[i]->value_len + 1)) {
-      buf_len = wrote_len + tags[i]->name_len + 2 + tags[i]->value_len + 1 + 4096;
+      buf_len =
+          wrote_len + tags[i]->name_len + 2 + tags[i]->value_len + 1 + PINBA_HASHED_TAGS_CHUNK;
       buf = (char *)erealloc(buf, buf_len + 1);
     }
     memcpy(buf + wrote_len, tags[i]->name, tags[i]->name_len);
@@ -448,10 +456,10 @@ static int php_pinba_timer_stop_helper(zval *zv, int num_args, va_list args,
 
     if (t->deleted || ((flags & PINBA_FLUSH_ONLY_STOPPED_TIMERS) != 0 && t->started)) {
       return ZEND_HASH_APPLY_KEEP;
-    } else {
-      php_pinba_timer_stop(t, now, u);
-      t->deleted = 1; /* ignore next time */
     }
+
+    php_pinba_timer_stop(t, now, u);
+    t->deleted = 1; /* ignore next time */
 
     if (zend_hash_index_exists(&PINBA_G(timers), t->rsrc_id) == 0) {
       zend_hash_index_update_ptr(&PINBA_G(timers), t->rsrc_id, t);
@@ -527,19 +535,19 @@ static pinba_sockaddr *php_pinba_connect_socket(const char *host, const char *po
     php_error_docref(NULL, E_WARNING, "failed to resolve Pinba server hostname '%s': %s", host,
                      gai_strerror(status));
     return NULL;
-  } else {
-    for (ai_ptr = ai_list; ai_ptr != NULL; ai_ptr = ai_ptr->ai_next) {
-      int fd = socket(ai_ptr->ai_family, ai_ptr->ai_socktype, ai_ptr->ai_protocol);
-      if (fd >= 0) {
-        sa = pecalloc(1, sizeof(pinba_sockaddr), 1);
-        memcpy(&sa->sockaddr, ai_ptr->ai_addr, ai_ptr->ai_addrlen);
-        sa->sockaddr_len = ai_ptr->ai_addrlen;
-        sa->sockaddr_time = now;
-        sa->fd = fd;
+  }
 
-        zend_hash_str_update_ptr(&resolver_cache, hostport, hostport_len, sa);
-        break;
-      }
+  for (ai_ptr = ai_list; ai_ptr != NULL; ai_ptr = ai_ptr->ai_next) {
+    int fd = socket(ai_ptr->ai_family, ai_ptr->ai_socktype, ai_ptr->ai_protocol);
+    if (fd >= 0) {
+      sa = pecalloc(1, sizeof(pinba_sockaddr), 1);
+      memcpy(&sa->sockaddr, ai_ptr->ai_addr, ai_ptr->ai_addrlen);
+      sa->sockaddr_len = ai_ptr->ai_addrlen;
+      sa->sockaddr_time = now;
+      sa->fd = fd;
+
+      zend_hash_str_update_ptr(&resolver_cache, hostport, hostport_len, sa);
+      break;
     }
   }
 
@@ -575,7 +583,8 @@ static int php_pinba_init_socket(pinba_collector *collectors, int n_collectors) 
 
 static inline int php_pinba_dict_find_or_add(HashTable *ht, char *word, size_t word_len) /* {{{ */
 {
-  size_t id, cnt;
+  size_t id;
+  size_t cnt;
 
   id = (size_t)zend_hash_str_find_ptr(ht, word, word_len);
   if (!id) {
@@ -613,12 +622,21 @@ static inline Pinba__Request *php_create_pinba_packet(pinba_client_t *client,
                                                       const char *custom_script_name,
                                                       int flags) /* {{{ */
 {
-  HashTable dict, *tags, *timers, timers_uniq;
+  HashTable dict;
+  HashTable *tags;
+  HashTable *timers;
+  HashTable timers_uniq;
   HashPosition pos;
   Pinba__Request *request;
-  char hostname[256], *tag_value;
+  char hostname[PINBA_HOSTNAME_BUF_SIZE];
+  char *tag_value;
   pinba_req_data *req_data = &PINBA_G(tmp_req_data);
-  int timers_num, tags_cnt, *tag_ids = NULL, *tag_value_ids = NULL, i, n;
+  int timers_num;
+  int tags_cnt;
+  int *tag_ids = NULL;
+  int *tag_value_ids = NULL;
+  int i;
+  int n;
 
   request = malloc(sizeof(Pinba__Request));
   if (!request) {
@@ -668,7 +686,8 @@ static inline Pinba__Request *php_create_pinba_packet(pinba_client_t *client,
     tags = &client->tags;
     timers = &client->timers;
   } else {
-    struct timeval ru_utime = {0, 0}, ru_stime = {0, 0};
+    struct timeval ru_utime = {0, 0};
+    struct timeval ru_stime = {0, 0};
     struct rusage u;
 
     req_data->mem_peak_usage = zend_memory_peak_usage(1);
@@ -680,7 +699,8 @@ static inline Pinba__Request *php_create_pinba_packet(pinba_client_t *client,
     if (PINBA_G(request_time) > 0) {
       request->request_time = PINBA_G(request_time);
     } else {
-      struct timeval request_finish, req_time;
+      struct timeval request_finish;
+      struct timeval req_time;
 
       gettimeofday(&request_finish, 0);
       timersub(&request_finish, &req_data->req_start, &req_time);
@@ -784,7 +804,8 @@ static inline Pinba__Request *php_create_pinba_packet(pinba_client_t *client,
 
   timers_num = zend_hash_num_elements(timers);
   if (timers_num > 0) {
-    pinba_timer_t *t, *old_t;
+    pinba_timer_t *t;
+    pinba_timer_t *old_t;
     char *hashed_tags;
     size_t hashed_tags_len;
 
@@ -972,7 +993,9 @@ static inline int php_pinba_req_data_send(pinba_client_t *client, const char *cu
   request = php_create_pinba_packet(client, custom_script_name, flags);
 
   if (request) {
-    int i, n_collectors, data_len;
+    int i;
+    int n_collectors;
+    int data_len;
     ssize_t sent;
     pinba_collector *collectors;
     char *data;
@@ -1126,7 +1149,8 @@ static int php_pinba_key_compare(Bucket *a, Bucket *b) /* {{{ */
 
 static int php_pinba_array_to_tags(HashTable *array, pinba_timer_tag_t ***tags) /* {{{ */
 {
-  int num, i = 0;
+  int num;
+  int i = 0;
   zval *value;
   zend_string *tag_name_str;
 
@@ -1243,7 +1267,7 @@ static void php_pinba_get_timer_info(pinba_timer_t *t, zval *info, struct timeva
 
 static void pinba_client_object_dtor(zend_object *object) /* {{{ */
 {
-  pinba_client_t *client = (pinba_client_t *)php_pinba_client_object(object);
+  pinba_client_t *client = php_pinba_client_object(object);
 
   if (!client->data_sent && (client->flags & PINBA_AUTO_FLUSH) != 0) {
     if (client->collectors_initialized ||
@@ -1257,7 +1281,7 @@ static void pinba_client_object_dtor(zend_object *object) /* {{{ */
 static void pinba_client_free_storage(zend_object *object) /* {{{ */
 {
   int i;
-  pinba_client_t *client = (pinba_client_t *)php_pinba_client_object(object);
+  pinba_client_t *client = php_pinba_client_object(object);
 
   zend_object_std_dtor(&client->std);
 
@@ -1326,7 +1350,7 @@ static PHP_FUNCTION(pinba_timer_start) {
     RETURN_FALSE;
   }
 
-  ZEND_PARSE_PARAMETERS_START(1, 3)
+  ZEND_PARSE_PARAMETERS_START(1, 3)  // NOLINT(readability-isolate-declaration): Zend macro
   Z_PARAM_ARRAY_EX(tags_array, 0, 1)
   Z_PARAM_OPTIONAL
   Z_PARAM_ZVAL(data)
@@ -1390,7 +1414,7 @@ static PHP_FUNCTION(pinba_timer_add) {
     RETURN_FALSE;
   }
 
-  ZEND_PARSE_PARAMETERS_START(2, 4)
+  ZEND_PARSE_PARAMETERS_START(2, 4)  // NOLINT(readability-isolate-declaration): Zend macro
   Z_PARAM_ARRAY_EX(tags_array, 0, 1)
   Z_PARAM_DOUBLE(value)
   Z_PARAM_OPTIONAL
@@ -1428,9 +1452,9 @@ static PHP_FUNCTION(pinba_timer_add) {
 
   t->started = 0;
   t->hit_count = hit_count;
-  time_l = (unsigned long)(value * 1000000.0);
-  t->value.tv_sec = time_l / 1000000;
-  t->value.tv_usec = time_l % 1000000;
+  time_l = (unsigned long)(value * (double)PINBA_USEC_PER_SEC);
+  t->value.tv_sec = time_l / PINBA_USEC_PER_SEC;
+  t->value.tv_usec = time_l % PINBA_USEC_PER_SEC;
 
   rsrc = zend_register_resource(t, le_pinba_timer);
   t->rsrc_id = rsrc->handle;
@@ -1493,7 +1517,8 @@ static PHP_FUNCTION(pinba_timer_delete) {
 /* {{{ proto bool pinba_timer_data_merge(resource timer, array data)
    Merge timer data with new data */
 static PHP_FUNCTION(pinba_timer_data_merge) {
-  zval *timer, *data;
+  zval *timer;
+  zval *data;
   pinba_timer_t *t;
 
   if (PINBA_G(timers_stopped)) {
@@ -1520,7 +1545,8 @@ static PHP_FUNCTION(pinba_timer_data_merge) {
 /* {{{ proto bool pinba_timer_data_replace(resource timer, array data)
    Replace timer data with new one */
 static PHP_FUNCTION(pinba_timer_data_replace) {
-  zval *timer, *data;
+  zval *timer;
+  zval *data;
   pinba_timer_t *t;
 
   if (PINBA_G(timers_stopped)) {
@@ -1558,14 +1584,16 @@ static PHP_FUNCTION(pinba_timer_tags_merge) {
   zval *timer;
   pinba_timer_t *t;
   pinba_timer_tag_t **new_tags;
-  int i, j, tags_num;
+  int i;
+  int j;
+  int tags_num;
 
   if (PINBA_G(timers_stopped)) {
     php_error_docref(NULL, E_WARNING, "all timers have already been stopped");
     RETURN_FALSE;
   }
 
-  ZEND_PARSE_PARAMETERS_START(2, 2)
+  ZEND_PARSE_PARAMETERS_START(2, 2)  // NOLINT(readability-isolate-declaration): Zend macro
   Z_PARAM_RESOURCE(timer)
   Z_PARAM_ARRAY_EX(tags, 0, 1)
   ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
@@ -1632,7 +1660,7 @@ static PHP_FUNCTION(pinba_timer_tags_replace) {
     RETURN_FALSE;
   }
 
-  ZEND_PARSE_PARAMETERS_START(2, 2)
+  ZEND_PARSE_PARAMETERS_START(2, 2)  // NOLINT(readability-isolate-declaration): Zend macro
   Z_PARAM_RESOURCE(timer)
   Z_PARAM_ARRAY_EX(tags, 0, 1)
   ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
@@ -1689,7 +1717,9 @@ static PHP_FUNCTION(pinba_reset) { php_pinba_reset_data(); }
 /* {{{ proto array pinba_get_info()
    Get request info */
 static PHP_FUNCTION(pinba_get_info) {
-  zval timers, timer_info, tags;
+  zval timers;
+  zval timer_info;
+  zval tags;
   struct timeval tmp;
   struct rusage u;
   HashPosition pos;
@@ -1883,7 +1913,6 @@ static PHP_FUNCTION(pinba_timers_get) {
       add_next_index_resource(return_value, rsrc);
     }
   }
-  return;
 }
 /* }}} */
 
@@ -1990,8 +2019,10 @@ static PHP_FUNCTION(pinba_request_time_set) {
 /* {{{ proto bool pinba_tag_set(string tag, string value)
    Set request tag */
 static PHP_FUNCTION(pinba_tag_set) {
-  char *tag, *value;
-  size_t tag_len, value_len;
+  char *tag;
+  char *value;
+  size_t tag_len;
+  size_t value_len;
 
   if (zend_parse_parameters(ZEND_NUM_ARGS(), "ss", &tag, &tag_len, &value, &value_len) != SUCCESS) {
     return;
@@ -2013,7 +2044,8 @@ static PHP_FUNCTION(pinba_tag_set) {
 /* {{{ proto string pinba_tag_get(string tag)
    Get previously set request tag value */
 static PHP_FUNCTION(pinba_tag_get) {
-  char *tag, *value;
+  char *tag;
+  char *value;
   size_t tag_len;
 
   if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &tag, &tag_len) != SUCCESS) {
@@ -2078,7 +2110,7 @@ static PHP_METHOD(PinbaClient, __construct) {
   pinba_client_t *client;
   long flags = 0;
 
-  ZEND_PARSE_PARAMETERS_START(1, 2)
+  ZEND_PARSE_PARAMETERS_START(1, 2)  // NOLINT(readability-isolate-declaration): Zend macro
   Z_PARAM_ARRAY_EX(servers, 0, 1)
   Z_PARAM_OPTIONAL
   Z_PARAM_LONG(flags)
@@ -2090,7 +2122,9 @@ static PHP_METHOD(PinbaClient, __construct) {
   for (zend_hash_internal_pointer_reset(Z_ARRVAL_P(servers));
        (tmp = zend_hash_get_current_data(Z_ARRVAL_P(servers))) != NULL;
        zend_hash_move_forward(Z_ARRVAL_P(servers))) {
-    char *host, *port, *address_copy;
+    char *host;
+    char *port;
+    char *address_copy;
     zend_string *str = zval_get_string(tmp);
 
     address_copy = estrndup(str->val, str->len);
@@ -2170,7 +2204,7 @@ static PHP_METHOD(PinbaClient, setRusage) {
   zval *tmp;
   int i;
 
-  ZEND_PARSE_PARAMETERS_START(1, 1)
+  ZEND_PARSE_PARAMETERS_START(1, 1)  // NOLINT(readability-isolate-declaration): Zend macro
   Z_PARAM_ARRAY_EX(rusage, 0, 1)
   ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
 
@@ -2194,8 +2228,10 @@ static PHP_METHOD(PinbaClient, setRusage) {
  */
 static PHP_METHOD(PinbaClient, setTag) {
   pinba_client_t *client;
-  char *tag, *value;
-  size_t tag_len, value_len;
+  char *tag;
+  char *value;
+  size_t tag_len;
+  size_t value_len;
 
   if (zend_parse_parameters(ZEND_NUM_ARGS(), "ss", &tag, &tag_len, &value, &value_len) != SUCCESS) {
     return;
@@ -2213,15 +2249,20 @@ static void php_pinba_client_timer_add_set(INTERNAL_FUNCTION_PARAMETERS, int add
 {
   pinba_client_t *client;
   long hit_count = 1;
-  double value, ru_utime = 0, ru_stime = 0;
-  zval *tags, *rusage = NULL;
+  double value;
+  double ru_utime = 0;
+  double ru_stime = 0;
+  zval *tags;
+  zval *rusage = NULL;
   char *hashed_tags;
-  size_t hashed_tags_len, i, tags_num;
+  size_t hashed_tags_len;
+  size_t i;
+  size_t tags_num;
   zval *tmp;
   pinba_timer_t *timer;
   pinba_timer_tag_t **new_tags;
 
-  ZEND_PARSE_PARAMETERS_START(2, 4)
+  ZEND_PARSE_PARAMETERS_START(2, 4)  // NOLINT(readability-isolate-declaration): Zend macro
   Z_PARAM_ARRAY_EX(tags, 0, 1)
   Z_PARAM_DOUBLE(value)
   Z_PARAM_OPTIONAL
