@@ -122,5 +122,3 @@ The CI workflow reads the PHP version list directly from `.github/php-versions.j
 
 - The extension contract and wire behavior must remain stable while build, CI, and
   packaging infrastructure are modernized.
-- `package.xml` is kept as historical legacy metadata and is not the active source of truth
-  for fork development.

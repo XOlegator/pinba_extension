@@ -2,7 +2,8 @@
 
 All notable changes in this fork are tracked here by release automation.
 
-Historical upstream release notes are preserved in `NEWS` and `docs/legacy-news.md`.
+Historical upstream release notes are preserved in `docs/legacy-news.md` (curated) and
+`docs/legacy-upstream-news.md` (verbatim upstream `NEWS`).
 
 ## [1.2.3](https://github.com/XOlegator/pinba_extension/compare/v1.2.2...v1.2.3) (2026-06-13)
 

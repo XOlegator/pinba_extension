@@ -62,14 +62,15 @@ Breaking changes:
 
 ## Release History Policy
 
-- Historical notes from the legacy upstream stay archived in `docs/legacy-news.md`.
+- Historical notes from the legacy upstream stay archived in `docs/legacy-news.md` (curated) and
+  `docs/legacy-upstream-news.md` (the verbatim upstream `NEWS`).
 - All new fork release history is generated into `CHANGELOG.md`.
-- Do not maintain new release notes manually in `NEWS`.
+- Do not maintain release notes by hand; the legacy archives are frozen and changelog entries
+  come from Conventional Commits via release automation.
 
 ## Repository Hygiene
 
 - Preserve original authorship and license notices.
 - Keep public documentation repository-relative and portable.
 - Do not commit local experiments, build artifacts, or internal-only planning files.
-- Treat `package.xml` as historical legacy metadata, not as the active development workflow.
 - Keep workflow files and public markdown clean enough to pass the repository lint jobs.
