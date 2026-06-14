@@ -7,7 +7,7 @@
 [![Packagist](https://img.shields.io/packagist/v/xolegator/pinba_extension?logo=packagist&logoColor=white)](https://packagist.org/packages/xolegator/pinba_extension)
 [![Copr](https://copr.fedorainfracloud.org/coprs/xolegator/pinba/package/php-pinba/status_image/last_build.png)](https://copr.fedorainfracloud.org/coprs/xolegator/pinba/)
 [![PHP](https://img.shields.io/badge/PHP-8.2%20%7C%208.3%20%7C%208.4%20%7C%208.5-777BB4?logo=php&logoColor=white)](https://github.com/XOlegator/pinba_extension/blob/master/.github/php-versions.json)
-[![License: LGPL-2.1](https://img.shields.io/github/license/XOlegator/pinba_extension)](https://github.com/XOlegator/pinba_extension/blob/master/COPYING)
+[![License: LGPL-2.1](https://img.shields.io/badge/license-LGPL--2.1-blue)](https://github.com/XOlegator/pinba_extension/blob/master/COPYING)
 
 Pinba Extension is the PHP client extension for the Pinba monitoring stack. It collects timing
 and request metrics inside PHP, serializes them with protobuf, and sends them over UDP to
