@@ -67,6 +67,23 @@ make -j"$(nproc)"
 make test
 ```
 
+## Troubleshooting
+
+### `./configure` reports `sed: No such file or directory` or `sort: No such file or directory`
+
+This is a local environment problem, not a repository one. `configure` blanks
+shell variables whose value contains a newline, so an empty or newline-bearing
+entry in `PATH` can transiently drop core tools like `sed`/`sort` from the
+lookup path during configuration. Sanitize `PATH` before running
+`phpize`/`configure`:
+
+```bash
+printf '%s\n' "$PATH" | tr ':' '\n' | grep -n '^$'    # spot empty PATH entries
+export PATH="$(printf '%s' "$PATH" | tr -s ':' | sed 's/^://; s/:$//')"
+```
+
+Then re-run `phpize && ./configure --enable-pinba`.
+
 ## Testing
 
 The extension is tested with the standard PHP `.phpt` harness (`run-tests.php`),
@@ -104,7 +121,9 @@ GitHub Actions currently validates:
 - PHPT execution on the same matrix
 - C code coverage (gcov/gcovr) uploaded to Codecov
 - AddressSanitizer + UBSan run of the PHPT suite against an ASan-instrumented PHP
+- a thread-safe (ZTS) build, run against the PHPT suite under ASan/UBSan
 - Valgrind memcheck run (informational, non-blocking)
+- CodeQL static security analysis of the C code
 
 The sanitizer job builds PHP itself with ASan/UBSan (via `tools/build-php-asan.sh`,
 cached between runs) so the instrumented extension is not loaded into a stock PHP
