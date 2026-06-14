@@ -48,6 +48,21 @@
 #include <malloc.h>
 #endif
 
+/*
+ * Pick the memory-footprint source once, portably. glibc >= 2.33 deprecates
+ * mallinfo() in favour of mallinfo2(). __GLIBC_PREREQ must never appear in a
+ * single #if next to defined(__GLIBC_PREREQ): the preprocessor still parses the
+ * whole expression, and on a libc without that macro (musl) it expands to
+ * 0(2,33), a syntax error. Nested #if keeps the version test out of reach until
+ * the macro is known to exist. Non-glibc libcs simply land on neither define and
+ * fall back to reporting 0.
+ */
+#if defined(HAVE_MALLOC_H) && defined(__GLIBC__) && defined(__GLIBC_PREREQ)
+#if __GLIBC_PREREQ(2, 33)
+#define PINBA_USE_MALLINFO2 1
+#endif
+#endif
+
 #include "php_pinba.h"
 #include "pinba.pb-c.h"
 
@@ -716,7 +731,7 @@ static inline Pinba__Request *php_create_pinba_packet(pinba_client_t *client,
 
     request->status = SG(sapi_headers).http_response_code;
     request->has_status = 1;
-#if defined(HAVE_MALLOC_H) && defined(__GLIBC__) && defined(__GLIBC_PREREQ) && __GLIBC_PREREQ(2, 33)
+#if defined(PINBA_USE_MALLINFO2)
     {
       struct mallinfo2 info;
 
@@ -731,6 +746,7 @@ static inline Pinba__Request *php_create_pinba_packet(pinba_client_t *client,
       request->memory_footprint = info.arena;  // + info.hblkhd;
     }
 #else
+    /* No glibc mallinfo (e.g. musl/Alpine): report 0 rather than fail to build. */
     request->memory_footprint = 0;
 #endif
     request->has_memory_footprint = 1;
