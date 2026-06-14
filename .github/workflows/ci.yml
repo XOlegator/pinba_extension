@@ -192,6 +192,63 @@ jobs:
           if-no-files-found: ignore
           retention-days: 14
 
+  zts:
+    name: Thread-safe build (ZTS + ASan)
+    runs-on: ubuntu-latest
+    # composer.json declares support-zts: true, but ondrej/php on Linux ships NTS
+    # only, so the claim is otherwise unverified. Build a thread-safe PHP from
+    # source (also ASan/UBSan-instrumented to avoid RTLD_DEEPBIND and add a
+    # memory-safety signal) and run the full PHPT suite against the ZTS extension.
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Install build dependencies
+        run: |
+          sudo apt-get update -q
+          sudo apt-get install -y --no-install-recommends libprotobuf-c-dev pkg-config
+
+      - name: Cache ZTS PHP build
+        id: cache-php-zts
+        uses: actions/cache@v5
+        with:
+          path: ~/php-zts
+          key: php-zts-${{ runner.os }}-PHP-8.4-${{ hashFiles('tools/build-php-asan.sh') }}
+
+      - name: Build ZTS PHP
+        if: steps.cache-php-zts.outputs.cache-hit != 'true'
+        env:
+          PHP_ZTS: '1'
+        run: bash tools/build-php-asan.sh 8.4
+
+      - name: Put ZTS PHP on PATH
+        run: echo "$HOME/php-zts/bin" >> "$GITHUB_PATH"
+
+      - name: Confirm thread safety
+        run: php -i | grep -i 'Thread Safety'
+
+      - name: Relax ASLR entropy for ASan
+        # Ubuntu 24.04 runners default to vm.mmap_rnd_bits=32, which the gcc 13
+        # ASan runtime cannot map shadow memory against (it aborts at startup).
+        run: sudo sysctl -w vm.mmap_rnd_bits=28
+
+      - name: Build extension and run tests under ZTS/ASan
+        env:
+          PHP_ASAN: '1'
+        run: bash tools/run-tests.sh asan
+
+      - name: Upload ZTS test artifacts on failure
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: zts-artifacts
+          path: |
+            tests/*.out
+            tests/*.log
+            tests/*.diff
+          if-no-files-found: ignore
+          retention-days: 14
+
   valgrind:
     name: Valgrind memcheck (informational)
     runs-on: ubuntu-latest

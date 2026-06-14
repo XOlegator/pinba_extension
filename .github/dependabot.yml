@@ -1,0 +1,20 @@
+version: 2
+updates:
+  # Keep GitHub Actions current. CI pins actions to mutable major tags (@v6,
+  # @v2, ...), so weekly PRs surface upstream releases and security fixes for
+  # the third-party actions the pipeline depends on.
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+    open-pull-requests-limit: 5
+    commit-message:
+      prefix: ci
+    labels:
+      - dependencies
+      - github-actions
+    groups:
+      github-actions:
+        patterns:
+          - "*"
