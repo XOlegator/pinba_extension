@@ -5,6 +5,13 @@ All notable changes in this fork are tracked here by release automation.
 Historical upstream release notes are preserved in `docs/legacy-news.md` (curated) and
 `docs/legacy-upstream-news.md` (verbatim upstream `NEWS`).
 
+## [1.3.2](https://github.com/XOlegator/pinba_extension/compare/v1.3.1...v1.3.2) (2026-06-14)
+
+
+### Bug Fixes
+
+* **rpm:** pass clean SRPM path to copr-cli and validate COPR_CONFIG ([#45](https://github.com/XOlegator/pinba_extension/issues/45)) ([6b6d125](https://github.com/XOlegator/pinba_extension/commit/6b6d125c509cdd2f64e1041962bff1bdf4f42cf1))
+
 ## [1.3.1](https://github.com/XOlegator/pinba_extension/compare/v1.3.0...v1.3.1) (2026-06-14)
 
 
