@@ -1,0 +1,13 @@
+name: pinba-extension CodeQL config
+
+# The protobuf bindings are generated from pinba.proto by protoc-c (see
+# docs/build.md and proto-drift.yml); they are not hand-written, so exclude them
+# from results to keep alerts focused on the extension's own C code.
+paths-ignore:
+  - pinba-pb-c.c
+  - pinba.pb-c.h
+
+# security-and-quality is the broadest suite; if it proves noisy on a PHP
+# extension, narrow this to security-extended.
+queries:
+  - uses: security-and-quality

@@ -1,0 +1,63 @@
+name: codeql
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+  schedule:
+    # Weekly, offset from the other Monday crons.
+    - cron: "41 5 * * 1"
+
+concurrency:
+  group: codeql-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  analyze:
+    name: CodeQL (C/C++)
+    runs-on: ubuntu-latest
+    permissions:
+      security-events: write
+      actions: read
+      contents: read
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.4"
+          coverage: none
+          tools: phpize
+
+      - name: Install build dependencies
+        run: |
+          sudo apt-get update -q
+          sudo apt-get install -y --no-install-recommends libprotobuf-c-dev
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v3
+        with:
+          languages: c-cpp
+          config-file: ./.github/codeql/codeql-config.yml
+
+      # Manual build (not autobuild) so CodeQL traces the exact phpize/configure
+      # recipe the extension uses, matching ci.yml.
+      - name: Build extension
+        run: |
+          phpize
+          ./configure --enable-pinba
+          make -j"$(nproc)"
+
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v3
+        with:
+          category: "/language:c-cpp"
