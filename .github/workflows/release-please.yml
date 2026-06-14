@@ -14,6 +14,9 @@ permissions:
 jobs:
   release-please:
     runs-on: ubuntu-latest
+    outputs:
+      release_created: ${{ steps.release.outputs.release_created }}
+      tag_name: ${{ steps.release.outputs.tag_name }}
     steps:
       - name: Run release-please
         id: release
@@ -23,3 +26,46 @@ jobs:
           config-file: release-please-config.json
           manifest-file: .release-please-manifest.json
           target-branch: master
+
+  # release-please owns CHANGELOG.md and php_pinba.h, but not debian/changelog.
+  # Keep the source package's changelog in sync so a local dpkg-buildpackage and
+  # Debian reviewers see the real version. The PPA build still derives its own
+  # per-suite version with dch from the release tag (which predates this commit),
+  # so this never collides with packaging.
+  sync-debian-changelog:
+    needs: release-please
+    if: needs.release-please.outputs.release_created == 'true'
+    runs-on: ubuntu-latest
+    env:
+      VERSION: ${{ needs.release-please.outputs.tag_name }}
+      DEBEMAIL: o.ekhlakov@protonmail.com
+      DEBFULLNAME: Oleg Ekhlakov
+    steps:
+      - name: Checkout master
+        uses: actions/checkout@v6
+        with:
+          ref: master
+          token: ${{ secrets.RELEASE_PLEASE_TOKEN }}
+          fetch-depth: 0
+
+      - name: Install devscripts
+        run: |
+          sudo apt-get update -q
+          sudo apt-get install -y --no-install-recommends devscripts
+
+      - name: Add debian/changelog entry and push
+        run: |
+          set -euo pipefail
+          version="${VERSION#v}"
+          current="$(dpkg-parsechangelog -S Version)"
+          if [ "${current%%-*}" = "$version" ]; then
+            echo "debian/changelog already at $version; nothing to do"
+            exit 0
+          fi
+          dch --newversion "${version}-1" --distribution unstable --force-distribution \
+            "Release ${version}; see CHANGELOG.md for details."
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add debian/changelog
+          git commit -m "chore(deb): update debian/changelog for ${version} [skip ci]"
+          git push origin HEAD:master
