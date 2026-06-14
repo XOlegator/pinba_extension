@@ -62,7 +62,9 @@ jobs:
             echo "debian/changelog already at $version; nothing to do"
             exit 0
           fi
-          dch --newversion "${version}-1" --distribution unstable --force-distribution \
+          # lintian on Ubuntu (the build-debs job) rejects "unstable"; use the
+          # current Ubuntu suite. The PPA publish overrides this per-suite anyway.
+          dch --newversion "${version}-1" --distribution noble --force-distribution \
             "Release ${version}; see CHANGELOG.md for details."
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
