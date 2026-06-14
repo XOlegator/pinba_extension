@@ -1,0 +1,117 @@
+name: rpm
+
+on:
+  push:
+    branches:
+      - master
+    paths:
+      - 'rpm/**'
+      - '**.c'
+      - '**.h'
+      - 'config.m4'
+      - '.github/workflows/rpm.yml'
+  pull_request:
+    branches:
+      - master
+    paths:
+      - 'rpm/**'
+      - '**.c'
+      - '**.h'
+      - 'config.m4'
+      - '.github/workflows/rpm.yml'
+  release:
+    types:
+      - published
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Git tag/version to package (empty = use the spec's version)
+        required: false
+        default: ''
+      chroots:
+        description: Comma-separated Copr chroots to build (empty = all project chroots)
+        required: false
+        default: ''
+
+concurrency:
+  group: rpm-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+permissions:
+  contents: read
+
+jobs:
+  # Gate: build the SRPM and all binary RPMs in a Remi-enabled Fedora image and
+  # confirm rpmbuild's %check loads each php<XY>-php-pinba module. Catches spec
+  # and extension-build breakage on every relevant change.
+  build-rpm:
+    name: Build RPMs (Fedora + Remi)
+    if: github.event_name == 'push' || github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    container: fedora:41
+    steps:
+      - name: Install tooling and Remi
+        run: |
+          dnf -y install dnf-plugins-core rpm-build rpmlint git-core tar gzip
+          dnf -y install "https://rpms.remirepo.net/fedora/remi-release-$(rpm -E %fedora).rpm"
+
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Build SRPM + RPMs
+        run: |
+          ver=$(awk '/^Version:/{print $2; exit}' rpm/pinba.spec)
+          echo "Building php-pinba $ver"
+          bash rpm/build-srpm.sh "$ver" --rpms
+
+      - name: rpmlint (informational)
+        # The Remi SCL layout legitimately ships files under /opt/remi, which
+        # rpmlint flags as dir-or-file-in-opt; do not gate on it.
+        run: rpmlint rpm/pinba.spec || true
+
+  # Publish: build the SRPM and submit it to Copr, which builds the binaries for
+  # the project's chroots. Auto-runs on a published release (like the PPA track).
+  publish-copr:
+    name: Publish to Copr
+    if: github.event_name == 'release' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    container: fedora:41
+    steps:
+      - name: Install tooling
+        run: dnf -y install rpm-build copr-cli git-core tar gzip
+
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ github.event.release.tag_name || inputs.tag || github.ref }}
+
+      - name: Configure copr-cli
+        env:
+          COPR_CONFIG: ${{ secrets.COPR_CONFIG }}
+        run: |
+          if [ -z "$COPR_CONFIG" ]; then
+            echo "COPR_CONFIG secret is not set" >&2
+            exit 1
+          fi
+          mkdir -p ~/.config
+          printf '%s\n' "$COPR_CONFIG" > ~/.config/copr
+
+      - name: Build SRPM
+        id: srpm
+        run: |
+          raw="${{ github.event.release.tag_name || inputs.tag }}"
+          ver="${raw#v}"
+          [ -n "$ver" ] || ver=$(awk '/^Version:/{print $2; exit}' rpm/pinba.spec)
+          echo "Packaging php-pinba $ver"
+          out=$(bash rpm/build-srpm.sh "$ver")
+          srpm=$(echo "$out" | grep '\.src\.rpm$' | head -1)
+          echo "srpm=$srpm" >> "$GITHUB_OUTPUT"
+
+      - name: Submit Copr build
+        run: |
+          args=()
+          if [ -n "${{ inputs.chroots }}" ]; then
+            IFS=',' read -ra cs <<< "${{ inputs.chroots }}"
+            for c in "${cs[@]}"; do args+=(--chroot "$c"); done
+          fi
+          copr-cli build "${args[@]}" xolegator/pinba "${{ steps.srpm.outputs.srpm }}"
