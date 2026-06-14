@@ -5,6 +5,7 @@
 [![codecov](https://codecov.io/gh/XOlegator/pinba_extension/branch/master/graph/badge.svg)](https://codecov.io/gh/XOlegator/pinba_extension)
 [![Release](https://img.shields.io/github/v/release/XOlegator/pinba_extension)](https://github.com/XOlegator/pinba_extension/releases/latest)
 [![Packagist](https://img.shields.io/packagist/v/xolegator/pinba_extension?logo=packagist&logoColor=white)](https://packagist.org/packages/xolegator/pinba_extension)
+[![Copr](https://copr.fedorainfracloud.org/coprs/xolegator/pinba/package/php-pinba/status_image/last_build.png)](https://copr.fedorainfracloud.org/coprs/xolegator/pinba/)
 [![PHP](https://img.shields.io/badge/PHP-8.2%20%7C%208.3%20%7C%208.4%20%7C%208.5-777BB4?logo=php&logoColor=white)](https://github.com/XOlegator/pinba_extension/blob/master/.github/php-versions.json)
 [![License: LGPL-2.1](https://img.shields.io/github/license/XOlegator/pinba_extension)](https://github.com/XOlegator/pinba_extension/blob/master/COPYING)
 
@@ -80,6 +81,30 @@ pinba.server  = 127.0.0.1:30002
 ```bash
 sudo systemctl restart php8.5-fpm   # for FPM; CLI picks the new config up automatically
 ```
+
+### From the Copr repo (Fedora, recommended)
+
+Prebuilt packages for Fedora are published to the
+[`xolegator/pinba`](https://copr.fedorainfracloud.org/coprs/xolegator/pinba/) Copr repository, built
+against [Remi's](https://rpms.remirepo.net/) PHP collections. **Remi must be enabled** — the packages
+depend on `php<XY>-php-common` from it:
+
+```bash
+sudo dnf install -y dnf-plugins-core
+sudo dnf install -y "https://rpms.remirepo.net/fedora/remi-release-$(rpm -E %fedora).rpm"
+sudo dnf copr enable xolegator/pinba
+sudo dnf install php84-php-pinba   # also available: php82-php-pinba, php83-php-pinba, php85-php-pinba
+```
+
+These are Remi SCL packages, so each installs into its collection and ships its ini at
+`/etc/opt/remi/php<XY>/php.d/40-pinba.ini`. Set the runtime options there:
+
+```ini
+pinba.enabled = 1
+pinba.server  = 127.0.0.1:30002
+```
+
+> AlmaLinux 9/10 and other Enterprise Linux targets are in progress.
 
 ### From source
 
