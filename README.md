@@ -82,16 +82,31 @@ pinba.server  = 127.0.0.1:30002
 sudo systemctl restart php8.5-fpm   # for FPM; CLI picks the new config up automatically
 ```
 
-### From the Copr repo (Fedora, recommended)
+### From the Copr repo (Fedora and Enterprise Linux)
 
-Prebuilt packages for Fedora are published to the
-[`xolegator/pinba`](https://copr.fedorainfracloud.org/coprs/xolegator/pinba/) Copr repository, built
-against [Remi's](https://rpms.remirepo.net/) PHP collections. **Remi must be enabled** — the packages
-depend on `php<XY>-php-common` from it:
+Prebuilt packages are published to the
+[`xolegator/pinba`](https://copr.fedorainfracloud.org/coprs/xolegator/pinba/) Copr repository for
+Fedora and Enterprise Linux 9/10 (AlmaLinux, Rocky, RHEL, CentOS Stream), built against
+[Remi's](https://rpms.remirepo.net/) PHP collections. **Remi must be enabled** — the packages depend
+on `php<XY>-php-common` from it.
+
+Enable Remi on Fedora:
 
 ```bash
 sudo dnf install -y dnf-plugins-core
 sudo dnf install -y "https://rpms.remirepo.net/fedora/remi-release-$(rpm -E %fedora).rpm"
+```
+
+…or on Enterprise Linux 9/10:
+
+```bash
+sudo dnf install -y dnf-plugins-core epel-release
+sudo dnf install -y "https://rpms.remirepo.net/enterprise/remi-release-$(rpm -E %rhel).rpm"
+```
+
+Then enable the Copr repo and install the build for your PHP version:
+
+```bash
 sudo dnf copr enable xolegator/pinba
 sudo dnf install php84-php-pinba   # also available: php82-php-pinba, php83-php-pinba, php85-php-pinba
 ```
@@ -103,8 +118,6 @@ These are Remi SCL packages, so each installs into its collection and ships its 
 pinba.enabled = 1
 pinba.server  = 127.0.0.1:30002
 ```
-
-> AlmaLinux 9/10 and other Enterprise Linux targets are in progress.
 
 ### From source
 
