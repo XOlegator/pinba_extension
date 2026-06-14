@@ -5,6 +5,13 @@ All notable changes in this fork are tracked here by release automation.
 Historical upstream release notes are preserved in `docs/legacy-news.md` (curated) and
 `docs/legacy-upstream-news.md` (verbatim upstream `NEWS`).
 
+## [1.3.1](https://github.com/XOlegator/pinba_extension/compare/v1.3.0...v1.3.1) (2026-06-14)
+
+
+### Bug Fixes
+
+* **build:** make memory-footprint guard compile on musl/Alpine ([#39](https://github.com/XOlegator/pinba_extension/issues/39)) ([74a0a63](https://github.com/XOlegator/pinba_extension/commit/74a0a6303c4924ea8618dfe2f3bb3a1372da3751))
+
 ## [1.3.0](https://github.com/XOlegator/pinba_extension/compare/v1.2.3...v1.3.0) (2026-06-13)
 
 
