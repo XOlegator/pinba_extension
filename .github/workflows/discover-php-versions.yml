@@ -27,6 +27,9 @@ jobs:
       - name: Update PHP support matrix
         run: php .github/scripts/update-php-support-matrix.php
 
+      - name: Update packaging matrix from apt availability
+        run: php .github/scripts/update-packaging-matrix.php
+
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v8
         with:
@@ -37,10 +40,15 @@ jobs:
           body: |
             ## Summary
             - refresh `.github/php-versions.json` from the official PHP supported versions page
-            - keep CI and future packaging automation aligned with currently supported PHP branches
+            - refresh `.github/packaging-matrix.json` per suite from real apt availability
+              (Ubuntu archive main+universe plus the ondrej/php PPA), intersected with supported branches
+            - keep CI and packaging automation aligned with currently supported PHP branches
 
             ## Notes
             - this automation opens a PR instead of changing `master` directly
             - newly discovered PHP branches still require successful CI before they should be treated as active fork support
+            - the PPA rebuild stays human-triggered: after merge, dispatch `packaging.yml`
+              (`upload=true`) to publish, so a new branch is never silently shipped to the PPA
           add-paths: |
             .github/php-versions.json
+            .github/packaging-matrix.json
