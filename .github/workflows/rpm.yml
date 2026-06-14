@@ -78,7 +78,7 @@ jobs:
     container: fedora:41
     steps:
       - name: Install tooling
-        run: dnf -y install rpm-build copr-cli git-core tar gzip
+        run: dnf -y install rpm-build copr-cli git-core tar gzip jq
 
       - name: Checkout
         uses: actions/checkout@v6
@@ -119,9 +119,15 @@ jobs:
 
       - name: Submit Copr build
         run: |
-          args=()
-          if [ -n "${{ inputs.chroots }}" ]; then
-            IFS=',' read -ra cs <<< "${{ inputs.chroots }}"
-            for c in "${cs[@]}"; do args+=(--chroot "$c"); done
+          # Explicit chroots from dispatch input, else the supported target set
+          # from rpm-matrix.json (so a release builds every target, not whatever
+          # chroots happen to be enabled on the project).
+          chroots="${{ inputs.chroots }}"
+          if [ -z "$chroots" ]; then
+            chroots=$(jq -r '.targets | keys | join(",")' .github/rpm-matrix.json)
           fi
+          args=()
+          IFS=',' read -ra cs <<< "$chroots"
+          for c in "${cs[@]}"; do args+=(--chroot "$c"); done
+          echo "Submitting build for chroots: ${cs[*]}"
           copr-cli build "${args[@]}" xolegator/pinba "${{ steps.srpm.outputs.srpm }}"
