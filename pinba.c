@@ -88,8 +88,8 @@ typedef struct {
   pinba_collector collectors[PINBA_COLLECTORS_MAX];
   unsigned int n_collectors;
   long flags;
-  int collectors_initialized : 1;
-  int data_sent : 1;
+  unsigned int collectors_initialized : 1;
+  unsigned int data_sent : 1;
   zend_object std;
 } pinba_client_t;
 
@@ -236,13 +236,8 @@ static inline void php_pinba_cleanup_collectors(pinba_collector *collectors,
   for (i = 0; i < *n_collectors; i++) {
     pinba_collector *collector = &collectors[i];
 
-    if (collector->host) {
-      free(collector->host);
-    }
-
-    if (collector->port) {
-      free(collector->port);
-    }
+    free(collector->host);
+    free(collector->port);
   }
   *n_collectors = 0;
 }
@@ -736,14 +731,16 @@ static inline Pinba__Request *php_create_pinba_packet(pinba_client_t *client,
       struct mallinfo2 info;
 
       info = mallinfo2();
-      request->memory_footprint = info.arena;  // + info.hblkhd;
+      /* arena only; mmap'd blocks (hblkhd) are intentionally not counted */
+      request->memory_footprint = info.arena;
     }
 #elif defined(HAVE_MALLOC_H) && defined(HAVE_MALLINFO)
     {
       struct mallinfo info;
 
       info = mallinfo();
-      request->memory_footprint = info.arena;  // + info.hblkhd;
+      /* arena only; mmap'd blocks (hblkhd) are intentionally not counted */
+      request->memory_footprint = info.arena;
     }
 #else
     /* No glibc mallinfo (e.g. musl/Alpine): report 0 rather than fail to build. */
@@ -1055,20 +1052,6 @@ static inline int php_pinba_req_data_send(pinba_client_t *client, const char *cu
   }
 
   return ret;
-}
-/* }}} */
-
-static inline void php_pinba_req_data_dtor(pinba_req_data *record) /* {{{ */
-{
-  if (record->server_name) {
-    efree(record->server_name);
-  }
-
-  if (record->script_name) {
-    efree(record->script_name);
-  }
-
-  memset(record, 0, sizeof(pinba_req_data));
 }
 /* }}} */
 
@@ -2261,6 +2244,10 @@ static PHP_METHOD(PinbaClient, setTag) {
 }
 /* }}} */
 
+/* Shared backend for PinbaClient::addTimer (add=1, aggregates into a timer with
+   matching tags) and PinbaClient::setTimer (add=0, replaces it). Parses the tags
+   array, value, and optional rusage pair and hit count from userland, validates
+   them, hashes the tags, and stores or merges the resulting timer on the client. */
 static void php_pinba_client_timer_add_set(INTERNAL_FUNCTION_PARAMETERS, int add) /* {{{ */
 {
   pinba_client_t *client;
