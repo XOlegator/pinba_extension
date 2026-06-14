@@ -94,7 +94,11 @@ jobs:
             exit 1
           fi
           mkdir -p ~/.config
-          printf '%s\n' "$COPR_CONFIG" > ~/.config/copr
+          printf '%s\n' "$COPR_CONFIG" | sed 's/\r$//' > ~/.config/copr
+          if ! grep -q '^\[copr-cli\]' ~/.config/copr; then
+            echo "COPR_CONFIG must be the full block from https://copr.fedorainfracloud.org/api/ (starting with [copr-cli])" >&2
+            exit 1
+          fi
 
       - name: Build SRPM
         id: srpm
@@ -104,7 +108,13 @@ jobs:
           [ -n "$ver" ] || ver=$(awk '/^Version:/{print $2; exit}' rpm/pinba.spec)
           echo "Packaging php-pinba $ver"
           out=$(bash rpm/build-srpm.sh "$ver")
-          srpm=$(echo "$out" | grep '\.src\.rpm$' | head -1)
+          srpm=$(printf '%s\n' "$out" | grep -oE '/[^[:space:]]+\.src\.rpm' | head -1)
+          if [ -z "$srpm" ] || [ ! -f "$srpm" ]; then
+            echo "could not locate built SRPM in:" >&2
+            printf '%s\n' "$out" >&2
+            exit 1
+          fi
+          echo "Built SRPM: $srpm"
           echo "srpm=$srpm" >> "$GITHUB_OUTPUT"
 
       - name: Submit Copr build
