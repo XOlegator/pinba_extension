@@ -27,12 +27,14 @@ sed "s/^Version:.*/Version:        ${ver}/" "$root/rpm/pinba.spec" > "$top/SPECS
 git -c safe.directory='*' -C "$root" archive --prefix="pinba-${ver}/" HEAD \
     | gzip -9 > "$top/SOURCES/pinba-${ver}.tar.gz"
 
+# Build noise goes to stderr so stdout carries only the artifact paths, which
+# callers (the publish workflow) parse to find the .src.rpm.
 if [ "$mode" = "--rpms" ]; then
-    dnf -y builddep "$top/SPECS/pinba.spec"
-    rpmbuild --define "_topdir $top" -ba "$top/SPECS/pinba.spec"
+    dnf -y builddep "$top/SPECS/pinba.spec" >&2
+    rpmbuild --define "_topdir $top" -ba "$top/SPECS/pinba.spec" >&2
 else
-    rpmbuild --define "_topdir $top" -bs "$top/SPECS/pinba.spec"
+    rpmbuild --define "_topdir $top" -bs "$top/SPECS/pinba.spec" >&2
 fi
 
-echo "TOPDIR=$top"
+echo "TOPDIR=$top" >&2
 find "$top/SRPMS" "$top/RPMS" -name '*.rpm' 2>/dev/null | sort
