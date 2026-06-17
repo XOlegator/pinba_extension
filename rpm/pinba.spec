@@ -28,7 +28,7 @@
 %global debug_package %{nil}
 
 Name:           php-pinba
-Version:        1.3.2
+Version:        1.3.1
 Release:        1%{?dist}
 Summary:        Pinba metrics extension for the distro-native PHP
 
@@ -149,9 +149,5 @@ end
 }
 
 %changelog
-* Mon Jun 16 2026 Oleg Ekhlakov <o.ekhlakov@protonmail.com> - 1.3.2-1
-- Add the base php-pinba package built against the distro-native PHP
-  (Fedora base repos / EL AppStream), alongside the Remi SCL subpackages.
-
 * Sun Jun 14 2026 Oleg Ekhlakov <o.ekhlakov@protonmail.com> - 1.3.1-1
 - Initial RPM packaging for the Remi php82..php85 SCLs.
