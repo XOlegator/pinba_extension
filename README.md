@@ -86,9 +86,25 @@ sudo systemctl restart php8.5-fpm   # for FPM; CLI picks the new config up autom
 
 Prebuilt packages are published to the
 [`xolegator/pinba`](https://copr.fedorainfracloud.org/coprs/xolegator/pinba/) Copr repository for
-Fedora and Enterprise Linux 9/10 (AlmaLinux, Rocky, RHEL, CentOS Stream), built against
-[Remi's](https://rpms.remirepo.net/) PHP collections. **Remi must be enabled** — the packages depend
-on `php<XY>-php-common` from it.
+Fedora and Enterprise Linux 9/10 (AlmaLinux, Rocky, RHEL, CentOS Stream). Two package families are
+available from the same repo.
+
+#### Distro-native PHP (`php-pinba`, no Remi)
+
+For the PHP that ships in your distribution's own repositories — **Remi is not required**:
+
+```bash
+sudo dnf copr enable xolegator/pinba
+sudo dnf install php-pinba
+```
+
+This builds for the OS's default PHP (Fedora 43 → 8.4, Fedora 44 → 8.5, Enterprise Linux 9 → 8.1
+from AppStream, Enterprise Linux 10 → 8.3) and ships its ini at `/etc/php.d/40-pinba.ini`.
+
+#### Multiple PHP versions via Remi (SCL `php<XY>-php-pinba`)
+
+To install the extension for a specific Remi PHP collection, **Remi must be enabled** — these
+packages depend on `php<XY>-php-common` from it.
 
 Enable Remi on Fedora:
 
@@ -112,7 +128,11 @@ sudo dnf install php84-php-pinba   # also available: php82-php-pinba, php83-php-
 ```
 
 These are Remi SCL packages, so each installs into its collection and ships its ini at
-`/etc/opt/remi/php<XY>/php.d/40-pinba.ini`. Set the runtime options there:
+`/etc/opt/remi/php<XY>/php.d/40-pinba.ini`.
+
+#### Runtime options
+
+Set the runtime options in the ini file shipped by whichever package you installed:
 
 ```ini
 pinba.enabled = 1
