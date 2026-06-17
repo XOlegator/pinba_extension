@@ -59,15 +59,40 @@ Current development direction:
 ### From the PPA (Ubuntu, recommended)
 
 Prebuilt packages are published to the
-[`ppa:xolegator/packages`](https://launchpad.net/~xolegator/+archive/ubuntu/packages) Launchpad PPA:
+[`ppa:xolegator/packages`](https://launchpad.net/~xolegator/+archive/ubuntu/packages) Launchpad PPA.
+The package name is always `php<X.Y>-pinba`, matching the PHP version it is built for.
+
+#### Distro-native PHP (no extra PHP repository)
+
+For the PHP that ships in Ubuntu's own archive — **no `ondrej/php` PPA required**. Install the
+`pinba` package matching your release's default PHP:
 
 ```bash
 sudo add-apt-repository ppa:xolegator/packages
 sudo apt-get update
-sudo apt-get install php8.5-pinba   # also available: php8.4-pinba, php8.3-pinba, php8.2-pinba
+sudo apt-get install php8.3-pinba   # Ubuntu 24.04 (noble) default PHP
+# Ubuntu 26.04 (resolute): sudo apt-get install php8.5-pinba
 ```
 
-Availability per Ubuntu release: 24.04 `noble` ships `php8.2`–`php8.5`; 26.04 `resolute` ships `php8.5`.
+Ubuntu 24.04 ships PHP 8.3 and Ubuntu 26.04 ships PHP 8.5 in their base archives, so the matching
+`php<X.Y>-pinba` installs on a clean system with no third-party PHP repository.
+
+#### Additional PHP versions via ondrej/php
+
+To install pinba for a PHP version that is **not** your release's default, first add the
+[`ppa:ondrej/php`](https://launchpad.net/~ondrej/+archive/ubuntu/php) PPA (the wide PHP-version
+repository) so the matching `php<X.Y>` runtime is available:
+
+```bash
+sudo add-apt-repository ppa:ondrej/php
+sudo add-apt-repository ppa:xolegator/packages
+sudo apt-get update
+sudo apt-get install php8.4-pinba   # also available on 24.04: php8.2-pinba, php8.5-pinba
+```
+
+Availability per Ubuntu release: 24.04 `noble` offers `php8.2`–`php8.5` (8.3 from the base archive,
+the rest via `ondrej/php`); 26.04 `resolute` offers only `php8.5` (its base PHP — `ondrej/php` has no
+`resolute` series).
 
 The package installs the extension and enables it (`phpenmod`). Set the runtime options in a
 drop-in such as `/etc/php/<version>/mods-available/pinba.ini` (or a separate `conf.d` file), then

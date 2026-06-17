@@ -1,9 +1,13 @@
 name: packaging
 
-# Two responsibilities:
+# Three responsibilities:
+#   build-base-deb — on every packaging-relevant change, build the distro-native
+#                 php<X.Y>-pinba in a pristine Ubuntu container with NO ondrej/php
+#                 and load-test it, proving the package works on a clean OS (the
+#                 Debian analog of the RPM base php-pinba build).
 #   build-debs  — on every packaging-relevant change, build the per-version
 #                 php<X.Y>-pinba binaries on Ubuntu (with ondrej/php) and lint
-#                 them, as a regression guard.
+#                 them, as a regression guard for the wide-PHP-version case.
 #   publish-ppa — on a published GitHub Release (or manual dispatch), build the
 #                 signed Debian *source* package for each Ubuntu suite and upload
 #                 it to ppa:xolegator/packages. Launchpad then builds the
@@ -71,6 +75,69 @@ permissions:
   contents: read
 
 jobs:
+  # Base case: a clean Ubuntu with only its own archive (no ondrej/php). Builds
+  # the suite's distro-native php<X.Y>-pinba and confirms the extension loads,
+  # guaranteeing users on a stock 24.04/26.04 can install pinba for the system
+  # PHP without adding any third-party PHP repository. Runs in a pristine
+  # ubuntu:24.04 container (not the GitHub runner image, which already carries
+  # extra PHP) so "no ondrej" is real, mirroring the RPM base build in rpm.yml.
+  build-base-deb:
+    name: Build base-PHP package (clean Ubuntu, no ondrej)
+    if: github.event_name == 'push' || github.event_name == 'pull_request'
+    runs-on: ubuntu-24.04
+    container: ubuntu:24.04
+    env:
+      DEBIAN_FRONTEND: noninteractive
+    steps:
+      - name: Install build tooling (Ubuntu archive only, no ondrej/php)
+        run: |
+          apt-get update -q
+          apt-get install -y --no-install-recommends \
+            build-essential debhelper devscripts fakeroot pkgconf \
+            libprotobuf-c-dev git ca-certificates jq
+
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Install the suite's distro-native php<ver>-dev
+        run: |
+          set -euo pipefail
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
+          base_ver="$(jq -r '.suites.noble.base_php_version' .github/packaging-matrix.json)"
+          echo "BASE_VER=$base_ver" >> "$GITHUB_ENV"
+          # php<ver>-dev/-cli come straight from the Ubuntu 24.04 archive.
+          apt-get install -y --no-install-recommends "php${base_ver}-dev" "php${base_ver}-cli"
+
+      - name: Restrict the build to the distro-native PHP
+        run: |
+          set -euo pipefail
+          # rules builds one extension per PHP_VERSIONS and excludes the rest.
+          echo "PHP_VERSIONS = ${BASE_VER}" > debian/php-ppa-build.mk
+          # Reduce Build-Depends to the single base php<ver>-dev so the source
+          # needs no third-party PHP repo (same control rewrite as publish-ppa).
+          bd="$(printf ' php%s-dev,' "$BASE_VER")"
+          awk -v bd="$bd" '
+            /^ php[0-9]+\.[0-9]+-dev,/ { if (!seen) { print bd; seen=1 } next }
+            { print }
+          ' debian/control > debian/control.tmp && mv debian/control.tmp debian/control
+
+      - name: Build the base binary package
+        run: |
+          set -euo pipefail
+          upstream="$(dpkg-parsechangelog -S Version | sed 's/-[^-]*$//')"
+          git archive --prefix="php-pinba-${upstream}/" HEAD \
+            | gzip -9 > "../php-pinba_${upstream}.orig.tar.gz"
+          dpkg-buildpackage -b -us -uc
+
+      - name: Install and verify the extension loads on the native PHP
+        run: |
+          set -euo pipefail
+          deb="$(ls ../php"${BASE_VER}"-pinba_*_*.deb)"
+          echo "Installing $deb"
+          apt-get install -y "$deb"
+          "php${BASE_VER}" -m | grep -qx pinba
+          echo "pinba loaded on distro-native php${BASE_VER}"
+
   build-debs:
     name: Build Debian packages
     if: github.event_name == 'push' || github.event_name == 'pull_request'
