@@ -86,6 +86,11 @@ jobs:
     if: github.event_name == 'push' || github.event_name == 'pull_request'
     runs-on: ubuntu-24.04
     container: ubuntu:24.04
+    # In a container GitHub defaults to sh (dash), which lacks `set -o pipefail`;
+    # ubuntu:24.04 ships bash, so run every step under it.
+    defaults:
+      run:
+        shell: bash
     env:
       DEBIAN_FRONTEND: noninteractive
     steps:
