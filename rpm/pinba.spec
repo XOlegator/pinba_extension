@@ -28,7 +28,7 @@
 %global debug_package %{nil}
 
 Name:           php-pinba
-Version:        1.3.1
+Version:        1.4.0
 Release:        1%{?dist}
 Summary:        Pinba metrics extension for the distro-native PHP
 
@@ -149,5 +149,8 @@ end
 }
 
 %changelog
+* Wed Jun 17 2026 Oleg Ekhlakov <o.ekhlakov@protonmail.com> - 1.4.0-1
+- Release 1.4.0; see CHANGELOG.md for details.
+
 * Sun Jun 14 2026 Oleg Ekhlakov <o.ekhlakov@protonmail.com> - 1.3.1-1
 - Initial RPM packaging for the Remi php82..php85 SCLs.
