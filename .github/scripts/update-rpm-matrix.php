@@ -11,6 +11,14 @@ declare(strict_types=1);
 // read its primary metadata, and keep the versions that are both upstream
 // supported (php-versions.json) and present in Remi.
 //
+// Only `php_versions` (the Remi SCL set) is refreshed here. The base build
+// always runs against each chroot's distro-native php-devel, so its
+// `base_php_version` is informational only and kept as a documented constant per
+// target (it is fixed for a release's lifetime and only changes when a new chroot
+// is added, which is already a manual matrix edit) — this avoids pulling Fedora's
+// multi-MB Everything metadata on every discovery run. The script preserves it as
+// it only rewrites `php_versions`.
+//
 // Run after update-php-support-matrix.php so all matrices land in one PR.
 
 $repoRoot = dirname(__DIR__, 2);
