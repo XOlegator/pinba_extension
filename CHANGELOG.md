@@ -5,6 +5,13 @@ All notable changes in this fork are tracked here by release automation.
 Historical upstream release notes are preserved in `docs/legacy-news.md` (curated) and
 `docs/legacy-upstream-news.md` (verbatim upstream `NEWS`).
 
+## [1.4.0](https://github.com/XOlegator/pinba_extension/compare/v1.3.2...v1.4.0) (2026-06-17)
+
+
+### Features
+
+* **rpm:** add base php-pinba package built against distro-native PHP ([#52](https://github.com/XOlegator/pinba_extension/issues/52)) ([2cecbe9](https://github.com/XOlegator/pinba_extension/commit/2cecbe9e3eb414a23db53376b0173713fe5fbb9c))
+
 ## [1.3.2](https://github.com/XOlegator/pinba_extension/compare/v1.3.1...v1.3.2) (2026-06-14)
 
 
