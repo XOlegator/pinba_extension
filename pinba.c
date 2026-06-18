@@ -2136,6 +2136,9 @@ static PHP_METHOD(PinbaClient, __construct) {
 
     new_collector = php_pinba_collector_add(client->collectors, &client->n_collectors);
     if (new_collector == NULL) {
+      php_error_docref(NULL, E_WARNING,
+                       "PinbaClient: more than %d collectors specified, ignoring the rest",
+                       PINBA_COLLECTORS_MAX);
       efree(address_copy);
       break;
     }
@@ -2642,10 +2645,12 @@ static PHP_INI_MH(OnUpdateCollectorAddress) /* {{{ */
 
     new_collector = php_pinba_collector_add(PINBA_G(collectors), &PINBA_G(n_collectors));
     if (new_collector == NULL) {
-      /* TODO: log that max collectors has been reached and recompilation is required (will never
-       * happen) */
-      free(copy);
-      return FAILURE;
+      /* More collectors were configured than PINBA_COLLECTORS_MAX allows. Keep the ones we
+       * already have and warn the operator instead of silently rejecting the whole directive. */
+      php_error_docref(NULL, E_WARNING,
+                       "pinba.server: more than %d collectors specified, ignoring the rest",
+                       PINBA_COLLECTORS_MAX);
+      break;
     }
     new_collector->host = strdup(new_node);
     new_collector->port =
