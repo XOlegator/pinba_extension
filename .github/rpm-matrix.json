@@ -8,7 +8,15 @@
       "family": "fedora",
       "base_php_version": "8.4"
     },
+    "fedora-43-aarch64": {
+      "family": "fedora",
+      "base_php_version": "8.4"
+    },
     "fedora-44-x86_64": {
+      "family": "fedora",
+      "base_php_version": "8.5"
+    },
+    "fedora-44-aarch64": {
       "family": "fedora",
       "base_php_version": "8.5"
     },
@@ -16,15 +24,23 @@
       "family": "enterprise",
       "base_php_version": "8.1"
     },
+    "epel-9-aarch64": {
+      "family": "enterprise",
+      "base_php_version": "8.1"
+    },
     "epel-10-x86_64": {
+      "family": "enterprise",
+      "base_php_version": "8.3"
+    },
+    "epel-10-aarch64": {
       "family": "enterprise",
       "base_php_version": "8.3"
     }
   },
   "notes": [
-    "Copr chroots the release build targets (publish-copr submits '.targets | keys'). epel-9/epel-10 cover AlmaLinux/Rocky/RHEL 9/10.",
-    "One package comes out of one SRPM: the base 'php-pinba' built against each target's distro-native PHP — no Remi needed at build or run time.",
-    "base_php_version is the distro-native PHP for that target (Fedora base repos / EL AppStream). Informational: the base build always runs and picks up whatever php-devel the chroot ships. On EL the base PHP comes from the AppStream php module stream (php:8.1 on EL9); enable the php module for the epel chroots in the Copr project's Buildroot customization if the default stream does not resolve php-devel in mock.",
+    "Copr chroots the release build targets (publish-copr submits '.targets | keys'). epel-9/epel-10 cover AlmaLinux/Rocky/RHEL 9/10. Both x86_64 and aarch64 are built.",
+    "One package comes out of one SRPM: the base 'php-pinba' built against each target's distro-native PHP — no Remi needed at build or run time. A PHP extension has no arch-specific build inputs, so aarch64 needs no extra vendoring (unlike the engine's storage-engine plugin).",
+    "base_php_version is the distro-native PHP for that target (Fedora base repos / EL AppStream). Informational: the base build always runs and picks up whatever php-devel the chroot ships. On EL, php-devel resolves from the default php module stream without an explicit module_enable.",
     "Parallel-installable builds for specific PHP versions (Remi SCL/module streams) are shipped by Remi's own repository, which packages this fork upstream since v1.4.0 (issue #58). This Copr no longer builds php<XY>-php-pinba subpackages, so no Remi external repo is needed on any chroot."
   ]
 }
