@@ -41,19 +41,18 @@ permissions:
   contents: read
 
 jobs:
-  # Gate: build the SRPM and all binary RPMs in a Remi-enabled Fedora image and
-  # confirm rpmbuild's %check loads each php<XY>-php-pinba module. Catches spec
-  # and extension-build breakage on every relevant change.
+  # Gate: build the SRPM and the binary RPM in a stock Fedora image and confirm
+  # rpmbuild's %check loads the php-pinba module. Catches spec and extension-build
+  # breakage on every relevant change. No Remi: the extension builds against the
+  # distro-native PHP (php-devel), so no third-party repo is needed.
   build-rpm:
-    name: Build RPMs (Fedora + Remi)
+    name: Build RPM (Fedora)
     if: github.event_name == 'push' || github.event_name == 'pull_request'
     runs-on: ubuntu-latest
     container: fedora:41
     steps:
-      - name: Install tooling and Remi
-        run: |
-          dnf -y install dnf-plugins-core rpm-build rpmlint git-core tar gzip
-          dnf -y install "https://rpms.remirepo.net/fedora/remi-release-$(rpm -E %fedora).rpm"
+      - name: Install tooling
+        run: dnf -y install dnf-plugins-core rpm-build rpmlint git-core tar gzip
 
       - name: Checkout
         uses: actions/checkout@v6
@@ -65,8 +64,6 @@ jobs:
           bash rpm/build-srpm.sh "$ver" --rpms
 
       - name: rpmlint (informational)
-        # The Remi SCL layout legitimately ships files under /opt/remi, which
-        # rpmlint flags as dir-or-file-in-opt; do not gate on it.
         run: rpmlint rpm/pinba.spec || true
 
   # Publish: build the SRPM and submit it to Copr, which builds the binaries for

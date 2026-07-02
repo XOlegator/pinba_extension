@@ -23,16 +23,12 @@ jobs:
         with:
           php-version: "8.4"
           coverage: none
-          extensions: bz2
 
       - name: Update PHP support matrix
         run: php .github/scripts/update-php-support-matrix.php
 
       - name: Update packaging matrix from apt availability
         run: php .github/scripts/update-packaging-matrix.php
-
-      - name: Update RPM matrix from Remi availability
-        run: php .github/scripts/update-rpm-matrix.php
 
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v8
@@ -46,16 +42,15 @@ jobs:
             - refresh `.github/php-versions.json` from the official PHP supported versions page
             - refresh `.github/packaging-matrix.json` per suite from real apt availability
               (Ubuntu archive main+universe plus the ondrej/php PPA), intersected with supported branches
-            - refresh `.github/rpm-matrix.json` per Copr target from real Remi availability
-              (fedora/enterprise repos), intersected with supported branches
             - keep CI and packaging automation aligned with currently supported PHP branches
 
             ## Notes
             - this automation opens a PR instead of changing `master` directly
             - newly discovered PHP branches still require successful CI before they should be treated as active fork support
-            - the PPA/Copr rebuilds stay human-triggered: after merge, dispatch `packaging.yml`
-              (`upload=true`) / `rpm.yml` to publish, so a new branch is never silently shipped
+            - the PPA rebuild stays human-triggered: after merge, dispatch `packaging.yml`
+              (`upload=true`) to publish, so a new branch is never silently shipped
+            - the Copr/RPM track builds only the distro-native `php-pinba` (no per-PHP-version
+              matrix); parallel PHP versions are shipped by Remi's own repository
           add-paths: |
             .github/php-versions.json
             .github/packaging-matrix.json
-            .github/rpm-matrix.json

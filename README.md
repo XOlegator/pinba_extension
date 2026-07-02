@@ -107,16 +107,17 @@ pinba.server  = 127.0.0.1:30002
 sudo systemctl restart php8.5-fpm   # for FPM; CLI picks the new config up automatically
 ```
 
-### From the Copr repo (Fedora and Enterprise Linux)
+### On Fedora and Enterprise Linux
 
-Prebuilt packages are published to the
-[`xolegator/pinba`](https://copr.fedorainfracloud.org/coprs/xolegator/pinba/) Copr repository for
-Fedora and Enterprise Linux 9/10 (AlmaLinux, Rocky, RHEL, CentOS Stream). Two package families are
-available from the same repo.
+There are two ways to get the extension, depending on whether you use your distribution's own PHP
+or a specific parallel-installable PHP version.
 
-#### Distro-native PHP (`php-pinba`, no Remi)
+#### Distro-native PHP — Copr (`php-pinba`, no Remi)
 
-For the PHP that ships in your distribution's own repositories — **Remi is not required**:
+For the PHP that ships in your distribution's own repositories, prebuilt packages are published to
+the [`xolegator/pinba`](https://copr.fedorainfracloud.org/coprs/xolegator/pinba/) Copr repository
+for Fedora and Enterprise Linux 9/10 (AlmaLinux, Rocky, RHEL, CentOS Stream) — **Remi is not
+required**:
 
 ```bash
 sudo dnf copr enable xolegator/pinba
@@ -126,34 +127,15 @@ sudo dnf install php-pinba
 This builds for the OS's default PHP (Fedora 43 → 8.4, Fedora 44 → 8.5, Enterprise Linux 9 → 8.1
 from AppStream, Enterprise Linux 10 → 8.3) and ships its ini at `/etc/php.d/40-pinba.ini`.
 
-#### Multiple PHP versions via Remi (SCL `php<XY>-php-pinba`)
+#### Specific / parallel PHP versions — Remi
 
-To install the extension for a specific Remi PHP collection, **Remi must be enabled** — these
-packages depend on `php<XY>-php-common` from it.
-
-Enable Remi on Fedora:
-
-```bash
-sudo dnf install -y dnf-plugins-core
-sudo dnf install -y "https://rpms.remirepo.net/fedora/remi-release-$(rpm -E %fedora).rpm"
-```
-
-…or on Enterprise Linux 9/10:
-
-```bash
-sudo dnf install -y dnf-plugins-core epel-release
-sudo dnf install -y "https://rpms.remirepo.net/enterprise/remi-release-$(rpm -E %rhel).rpm"
-```
-
-Then enable the Copr repo and install the build for your PHP version:
-
-```bash
-sudo dnf copr enable xolegator/pinba
-sudo dnf install php84-php-pinba   # also available: php82-php-pinba, php83-php-pinba, php85-php-pinba
-```
-
-These are Remi SCL packages, so each installs into its collection and ships its ini at
-`/etc/opt/remi/php<XY>/php.d/40-pinba.ini`.
+For a specific PHP version, or to run several PHP versions side by side, use
+[Remi's repository](https://rpms.remirepo.net/). Remi packages **this fork** for its module and
+Software Collection streams (PHP 8.2+), so those builds always track the current extension —
+[status page](https://blog.remirepo.net/pages/PECL-extensions-RPM-status). Enable Remi and install
+`php-pinba` from the module stream, or `php<XY>-php-pinba` from the matching Software Collection,
+e.g. `dnf install php84-php-pinba`. Follow the [Remi configuration
+wizard](https://rpms.remirepo.net/wizard/) for the exact commands for your OS and PHP version.
 
 #### Runtime options
 

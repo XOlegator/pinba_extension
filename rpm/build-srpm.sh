@@ -6,11 +6,11 @@
 #   rpm/build-srpm.sh <version> [--rpms]
 #
 #     <version>   upstream version to stamp into the spec + tarball, e.g. 1.3.1
-#     --rpms      also build binary RPMs (needs the php<XY>-php-devel build deps);
-#                 without it only the .src.rpm is produced
+#     --rpms      also build the binary RPM (needs php-devel/php-cli/protobuf-c-devel,
+#                 all in base Fedora/EL); without it only the .src.rpm is produced
 #
-# Requires (Fedora/EL): rpm-build, git, tar, gzip; with --rpms also dnf-plugins-core
-# and a Remi-enabled environment for the php<XY>-php-devel BuildRequires.
+# Requires (Fedora/EL): rpm-build, git, tar, gzip; with --rpms also dnf-plugins-core.
+# The extension builds against the distro-native PHP, so no Remi is needed.
 set -euo pipefail
 
 ver="${1:?usage: build-srpm.sh <version> [--rpms]}"
