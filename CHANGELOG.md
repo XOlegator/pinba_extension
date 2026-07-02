@@ -5,6 +5,13 @@ All notable changes in this fork are tracked here by release automation.
 Historical upstream release notes are preserved in `docs/legacy-news.md` (curated) and
 `docs/legacy-upstream-news.md` (verbatim upstream `NEWS`).
 
+## [1.6.0](https://github.com/XOlegator/pinba_extension/compare/v1.5.0...v1.6.0) (2026-07-02)
+
+
+### Features
+
+* **rpm:** build RPMs for aarch64 too ([#62](https://github.com/XOlegator/pinba_extension/issues/62)) ([638724f](https://github.com/XOlegator/pinba_extension/commit/638724f60fb3eafa5f438fbf38b4040eabf842a6))
+
 ## [1.5.0](https://github.com/XOlegator/pinba_extension/compare/v1.4.0...v1.5.0) (2026-07-02)
 
 
