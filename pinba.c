@@ -2278,6 +2278,9 @@ static void php_pinba_client_timer_add_set(INTERNAL_FUNCTION_PARAMETERS, int add
 
   client = Z_PINBACLIENT_P(getThis());
 
+  /* Reject malformed input up front: tags must be present, value and hit count
+     may not be negative, and rusage (when supplied) must be exactly two
+     elements, the {utime, stime} pair. */
   tags_num = zend_hash_num_elements(Z_ARRVAL_P(tags));
   if (!tags_num) {
     php_error_docref(NULL, E_WARNING, "timer tags array cannot be empty");
@@ -2300,6 +2303,8 @@ static void php_pinba_client_timer_add_set(INTERNAL_FUNCTION_PARAMETERS, int add
   }
 
   if (rusage) {
+    /* rusage is an ordered pair: element 0 is user time, element 1 is system
+       time. Walk the array in order and assign accordingly. */
     for (zend_hash_internal_pointer_reset(Z_ARRVAL_P(rusage)), i = 0;
          ((tmp = zend_hash_get_current_data(Z_ARRVAL_P(rusage))) != NULL) && i < 2;
          zend_hash_move_forward(Z_ARRVAL_P(rusage)), i++) {
@@ -2311,6 +2316,9 @@ static void php_pinba_client_timer_add_set(INTERNAL_FUNCTION_PARAMETERS, int add
     }
   }
 
+  /* Convert the userland tag array into the internal tag representation, then
+     derive the stable hash key that identifies a timer with this exact tag set.
+     Free the partial allocation on any failure so nothing leaks. */
   if (php_pinba_array_to_tags(Z_ARRVAL_P(tags), &new_tags) != SUCCESS) {
     RETURN_FALSE;
   }
@@ -2322,6 +2330,7 @@ static void php_pinba_client_timer_add_set(INTERNAL_FUNCTION_PARAMETERS, int add
     RETURN_FALSE;
   }
 
+  /* Build the timer, converting the float seconds into the wire timeval form. */
   timer = ecalloc(1, sizeof(pinba_timer_t));
   float_to_timeval(value, timer->value);
   float_to_timeval(ru_utime, timer->ru_utime);
@@ -2331,6 +2340,10 @@ static void php_pinba_client_timer_add_set(INTERNAL_FUNCTION_PARAMETERS, int add
   timer->hit_count = hit_count;
 
   if (add) {
+    /* addTimer: if a timer with the same tags already exists, merge into it —
+       sum the value and rusage and accumulate the hit count (a 0 hit_count is
+       treated as a single hit) — and drop the temporary timer we just built.
+       Otherwise store the new timer as-is. */
     pinba_timer_t *old_t;
 
     old_t = zend_hash_str_find_ptr(&client->timers, hashed_tags, hashed_tags_len);
@@ -2349,8 +2362,10 @@ static void php_pinba_client_timer_add_set(INTERNAL_FUNCTION_PARAMETERS, int add
       zend_hash_str_add_ptr(&client->timers, hashed_tags, hashed_tags_len, timer);
     }
   } else {
+    /* setTimer: replace any existing timer for these tags outright. */
     zend_hash_str_update_ptr(&client->timers, hashed_tags, hashed_tags_len, timer);
   }
+  /* The hash table now owns the timer; only the local hash-key copy is ours. */
   efree(hashed_tags);
   RETURN_TRUE;
 }
