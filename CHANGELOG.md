@@ -5,6 +5,13 @@ All notable changes in this fork are tracked here by release automation.
 Historical upstream release notes are preserved in `docs/legacy-news.md` (curated) and
 `docs/legacy-upstream-news.md` (verbatim upstream `NEWS`).
 
+## [1.5.0](https://github.com/XOlegator/pinba_extension/compare/v1.4.0...v1.5.0) (2026-07-02)
+
+
+### Features
+
+* warn instead of silently dropping excess collectors ([#56](https://github.com/XOlegator/pinba_extension/issues/56)) ([b371a59](https://github.com/XOlegator/pinba_extension/commit/b371a59fd89566522080db405d3bd295955e629e))
+
 ## [1.4.0](https://github.com/XOlegator/pinba_extension/compare/v1.3.2...v1.4.0) (2026-06-17)
 
 
