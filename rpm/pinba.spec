@@ -18,7 +18,7 @@
 %global debug_package %{nil}
 
 Name:           php-pinba
-Version:        1.5.0
+Version:        1.6.0
 Release:        1%{?dist}
 Summary:        Pinba metrics extension for the distro-native PHP
 
@@ -72,6 +72,9 @@ extdir="$(%{_bindir}/php-config --extension-dir)"
 %config(noreplace) /etc/php.d/40-pinba.ini
 
 %changelog
+* Thu Jul 02 2026 Oleg Ekhlakov <o.ekhlakov@protonmail.com> - 1.6.0-1
+- Release 1.6.0; see CHANGELOG.md for details.
+
 * Thu Jul 02 2026 Oleg Ekhlakov <o.ekhlakov@protonmail.com> - 1.5.0-1
 - Release 1.5.0; see CHANGELOG.md for details.
 
