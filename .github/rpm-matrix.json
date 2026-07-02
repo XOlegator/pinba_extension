@@ -1,62 +1,30 @@
 {
-  "generated_at": "2026-06-14",
+  "generated_at": "2026-07-02",
   "copr_project": "xolegator/pinba",
   "source_package": "php-pinba",
   "base_package": "php-pinba",
-  "binary_package_template": "php{php_version_nodot}-php-pinba",
-  "remi_baseurls": {
-    "fedora": "https://rpms.remirepo.net/fedora/$releasever/remi/$basearch/",
-    "enterprise": "https://rpms.remirepo.net/enterprise/$releasever/remi/$basearch/"
-  },
   "targets": {
     "fedora-43-x86_64": {
       "family": "fedora",
-      "base_php_version": "8.4",
-      "php_versions": [
-        "8.2",
-        "8.3",
-        "8.4",
-        "8.5"
-      ]
+      "base_php_version": "8.4"
     },
     "fedora-44-x86_64": {
       "family": "fedora",
-      "base_php_version": "8.5",
-      "php_versions": [
-        "8.2",
-        "8.3",
-        "8.4",
-        "8.5"
-      ]
+      "base_php_version": "8.5"
     },
     "epel-9-x86_64": {
       "family": "enterprise",
-      "base_php_version": "8.1",
-      "php_versions": [
-        "8.2",
-        "8.3",
-        "8.4",
-        "8.5"
-      ]
+      "base_php_version": "8.1"
     },
     "epel-10-x86_64": {
       "family": "enterprise",
-      "base_php_version": "8.3",
-      "php_versions": [
-        "8.2",
-        "8.3",
-        "8.4",
-        "8.5"
-      ]
+      "base_php_version": "8.3"
     }
   },
   "notes": [
-    "Copr chroots the release build targets. epel-9/epel-10 cover AlmaLinux/Rocky/RHEL 9/10.",
-    "Two package families come out of one SRPM: the base 'php-pinba' built against each target's distro-native PHP (no Remi), plus the Remi SCL 'php<XY>-php-pinba' subpackages.",
-    "base_php_version is the distro-native PHP for that target (Fedora base repos / EL AppStream). Informational: the base build always runs and picks up whatever php-devel the chroot ships. Probed from Fedora metadata; EL values are documented constants.",
-    "On EL the base PHP comes from the AppStream php module stream (php:8.1 on EL9); enable the php module for the epel chroots in the Copr project's Buildroot customization if the default stream does not resolve php-devel in mock.",
-    "php_versions per target is the intersection of supported branches (php-versions.json) and Remi availability for that target; update-rpm-matrix.php keeps it accurate from Remi metadata.",
-    "Remi must be configured per chroot in the Copr project (fedora baseurl on Fedora chroots, enterprise baseurl on EL chroots) — a project-wide baseurl 404s on the other family and fails the build.",
-    "A new PHP branch is not built for a target until Remi actually ships its php<XY>-php-devel there."
+    "Copr chroots the release build targets (publish-copr submits '.targets | keys'). epel-9/epel-10 cover AlmaLinux/Rocky/RHEL 9/10.",
+    "One package comes out of one SRPM: the base 'php-pinba' built against each target's distro-native PHP — no Remi needed at build or run time.",
+    "base_php_version is the distro-native PHP for that target (Fedora base repos / EL AppStream). Informational: the base build always runs and picks up whatever php-devel the chroot ships. On EL the base PHP comes from the AppStream php module stream (php:8.1 on EL9); enable the php module for the epel chroots in the Copr project's Buildroot customization if the default stream does not resolve php-devel in mock.",
+    "Parallel-installable builds for specific PHP versions (Remi SCL/module streams) are shipped by Remi's own repository, which packages this fork upstream since v1.4.0 (issue #58). This Copr no longer builds php<XY>-php-pinba subpackages, so no Remi external repo is needed on any chroot."
   ]
 }
