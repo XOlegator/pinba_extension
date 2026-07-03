@@ -60,6 +60,12 @@ Breaking changes:
 - `feat!: ...`
 - or include a `BREAKING CHANGE:` footer in the commit or PR description
 
+The type also decides whether a change cuts a release. Only extension-code changes
+(`pinba.c`, `php_pinba.h`, `config.m4`, `pinba.proto`) should use `feat:`/`fix:`, which bump the
+version and tag; packaging, CI, script, docs and test changes use `ci:`/`build:`/`chore:`/`docs:`/
+`test:` and leave the version unchanged. See `docs/releasing.md` →
+"Version Discipline: What Warrants a Release".
+
 ## Release History Policy
 
 - Historical notes from the legacy upstream stay archived in `docs/legacy-news.md` (curated) and

@@ -76,5 +76,13 @@ When multiple PHP versions are supported, build and test against each target PHP
 - Merge into `master` only through Pull Requests.
 - Use Conventional Commits for commit messages and PR titles so release automation can update
   `CHANGELOG.md`.
+- Choose the commit type by what the change affects, so the version only moves for real
+  extension changes:
+  - Extension code (`pinba.c`, `php_pinba.h`, `config.m4`, `pinba.proto`) → `feat:`/`fix:`,
+    which cut a new version, tag and tarball.
+  - Packaging, CI, scripts, docs and tests (`debian/`, `rpm/`, `.github/`, `scripts/`, `docs/`,
+    `*.md`) → `ci:`/`build:`/`chore:`/`docs:`/`test:`, which do not bump the version.
+  - Prefer `fix` over `feat` for behaviour corrections. See `docs/releasing.md` →
+    "Version Discipline: What Warrants a Release" for the full rule and the reasoning.
 - Keep changes focused and verifiable.
 - Prefer small migrations that unlock future automation over large rewrites without tests.
