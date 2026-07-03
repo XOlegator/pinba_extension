@@ -1,3 +1,10 @@
+php-pinba (1.7.0-1) noble; urgency=medium
+
+  * packaging: AppStream metainfo, CHANGELOG-sourced release notes, and
+    action updates
+
+ -- Oleg Ekhlakov <o.ekhlakov@protonmail.com>  Fri, 03 Jul 2026 12:34:06 +0000
+
 php-pinba (1.6.0-1) noble; urgency=medium
 
   * Release 1.6.0; see CHANGELOG.md for details.
