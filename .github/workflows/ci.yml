@@ -24,7 +24,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Read PHP support matrix
         id: read-matrix
@@ -44,7 +44,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
@@ -107,7 +107,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
@@ -149,7 +149,7 @@ jobs:
     # makes the run a real, gating memory-safety check.
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Install build dependencies
         run: |
@@ -158,7 +158,7 @@ jobs:
 
       - name: Cache ASan PHP build
         id: cache-php-asan
-        uses: actions/cache@v5
+        uses: actions/cache@v6
         with:
           path: ~/php-asan
           key: php-asan-${{ runner.os }}-PHP-8.4-${{ hashFiles('tools/build-php-asan.sh') }}
@@ -201,7 +201,7 @@ jobs:
     # memory-safety signal) and run the full PHPT suite against the ZTS extension.
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Install build dependencies
         run: |
@@ -210,7 +210,7 @@ jobs:
 
       - name: Cache ZTS PHP build
         id: cache-php-zts
-        uses: actions/cache@v5
+        uses: actions/cache@v6
         with:
           path: ~/php-zts
           key: php-zts-${{ runner.os }}-PHP-8.4-${{ hashFiles('tools/build-php-asan.sh') }}
@@ -257,7 +257,7 @@ jobs:
     continue-on-error: true
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Setup PHP
         uses: shivammathur/setup-php@v2

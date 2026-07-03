@@ -17,6 +17,9 @@
 # shipping, so disable the auto debug subpackages.
 %global debug_package %{nil}
 
+# Older RPM macro sets (some EL chroots) don't predefine %{_metainfodir}.
+%{!?_metainfodir:%global _metainfodir %{_datadir}/metainfo}
+
 Name:           php-pinba
 Version:        1.6.0
 Release:        1%{?dist}
@@ -34,6 +37,10 @@ BuildRequires:  make
 BuildRequires:  protobuf-c-devel
 BuildRequires:  php-devel
 BuildRequires:  php-cli
+# Used at %%install to inject this release's notes into the AppStream metainfo
+# from CHANGELOG.md (both ship in the source tarball). python3 is in every
+# Fedora/EL buildroot; the helper script has no third-party dependencies.
+BuildRequires:  python3
 
 Requires:       php-common%{?_isa}
 
@@ -61,6 +68,14 @@ cat > "%{buildroot}/etc/php.d/40-pinba.ini" <<EOF
 extension=pinba.so
 EOF
 
+# AppStream metadata so GNOME Software (and other software centres) show the
+# author, license and description, plus this release's notes as "What's New".
+metainfo="%{buildroot}%{_metainfodir}/io.github.xolegator.php-pinba.metainfo.xml"
+install -Dpm 0644 rpm/pinba.metainfo.xml "$metainfo"
+# Inject this release's notes from CHANGELOG.md; keep the seeded <release> if the
+# changelog has no section for this version (e.g. a local dev build).
+python3 scripts/changelog-release-notes.py appstream-inject %{version} "$metainfo" || :
+
 %check
 extdir="$(%{_bindir}/php-config --extension-dir)"
 %{_bindir}/php -n -d extension="%{buildroot}${extdir}/pinba.so" -m | grep -qx pinba
@@ -70,6 +85,7 @@ extdir="$(%{_bindir}/php-config --extension-dir)"
 %doc README.md
 %{_libdir}/php/modules/pinba.so
 %config(noreplace) /etc/php.d/40-pinba.ini
+%{_metainfodir}/io.github.xolegator.php-pinba.metainfo.xml
 
 %changelog
 * Thu Jul 02 2026 Oleg Ekhlakov <o.ekhlakov@protonmail.com> - 1.6.0-1
