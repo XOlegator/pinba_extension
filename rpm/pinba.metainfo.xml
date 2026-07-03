@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="generic">
+  <id>io.github.xolegator.php-pinba</id>
+  <pkgname>php-pinba</pkgname>
+  <metadata_license>MIT</metadata_license>
+  <project_license>LGPL-2.1-or-later</project_license>
+
+  <name>Pinba PHP Extension</name>
+  <summary>Timer and profiling extension for PHP</summary>
+
+  <description>
+    <p>
+      Pinba measures PHP script execution and sends compact Protocol Buffers
+      statistics over UDP to a Pinba server — the pinba_engine storage engine
+      for MySQL or MariaDB — enabling real-time monitoring of request time,
+      memory usage and user-defined timers.
+    </p>
+    <p>
+      This package builds the extension for the distribution's own PHP.
+    </p>
+  </description>
+
+  <developer id="io.github.xolegator">
+    <name>Oleg Ekhlakov</name>
+  </developer>
+
+  <url type="homepage">https://github.com/XOlegator/pinba_extension</url>
+  <url type="bugtracker">https://github.com/XOlegator/pinba_extension/issues</url>
+  <url type="vcs-browser">https://github.com/XOlegator/pinba_extension</url>
+
+  <categories>
+    <category>Development</category>
+  </categories>
+
+  <!--
+    The build injects this release's notes (from CHANGELOG.md) as the newest
+    <release> during rpmbuild %install; this seed keeps the file valid for local
+    builds of a version the changelog does not list.
+  -->
+  <releases>
+    <release version="1.6.0" date="2026-07-02"/>
+  </releases>
+
+  <content_rating type="oars-1.1"/>
+</component>
