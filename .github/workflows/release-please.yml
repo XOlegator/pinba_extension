@@ -42,7 +42,7 @@ jobs:
       DEBFULLNAME: Oleg Ekhlakov
     steps:
       - name: Checkout master
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           ref: master
           token: ${{ secrets.RELEASE_PLEASE_TOKEN }}
@@ -62,10 +62,22 @@ jobs:
             echo "debian/changelog already at $version; nothing to do"
             exit 0
           fi
+          # Pull this release's real bullets from CHANGELOG.md (release-please
+          # already wrote them there); fall back to a stub if extraction fails.
+          notes="$(python3 scripts/changelog-release-notes.py deb "$version" 2>/dev/null || true)"
+          [ -n "$notes" ] || notes="Release ${version}; see CHANGELOG.md for details."
           # lintian on Ubuntu (the build-debs job) rejects "unstable"; use the
           # current Ubuntu suite. The PPA publish overrides this per-suite anyway.
-          dch --newversion "${version}-1" --distribution noble --force-distribution \
-            "Release ${version}; see CHANGELOG.md for details."
+          first=1
+          while IFS= read -r line; do
+            [ -n "$line" ] || continue
+            if [ "$first" = 1 ]; then
+              dch --newversion "${version}-1" --distribution noble --force-distribution "$line"
+              first=0
+            else
+              dch --append "$line"
+            fi
+          done <<< "$notes"
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add debian/changelog
@@ -86,7 +98,7 @@ jobs:
       VERSION: ${{ needs.release-please.outputs.tag_name }}
     steps:
       - name: Checkout master
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           ref: master
           token: ${{ secrets.RELEASE_PLEASE_TOKEN }}
@@ -103,11 +115,18 @@ jobs:
             exit 0
           fi
           sed -i -E "s/^(Version:[[:space:]]+).*/\1${version}/" "$spec"
-          # Prepend a new %changelog entry right after the %changelog header.
+          # Prepend a new %changelog entry right after the %changelog header,
+          # using this release's real bullets from CHANGELOG.md (release-please
+          # already wrote them there); fall back to a stub if extraction fails.
+          notes="$(python3 scripts/changelog-release-notes.py deb "$version" 2>/dev/null || true)"
+          [ -n "$notes" ] || notes="Release ${version}; see CHANGELOG.md for details."
           entry_date="$(LC_ALL=C date -u '+%a %b %d %Y')"
           {
             printf '* %s Oleg Ekhlakov <o.ekhlakov@protonmail.com> - %s-1\n' "$entry_date" "$version"
-            printf -- '- Release %s; see CHANGELOG.md for details.\n' "$version"
+            while IFS= read -r line; do
+              [ -n "$line" ] || continue
+              printf -- '- %s\n' "$line"
+            done <<< "$notes"
             printf '\n'
           } > /tmp/rpm-changelog-entry.txt
           awk 'NR==FNR{e=e $0 ORS; next} {print} /^%changelog$/ && !done{printf "%s", e; done=1}' \
