@@ -23,6 +23,15 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
+/* Must precede every header: it makes glibc expose the GNU (char *) strerror_r
+ * prototype that pinba_strerror() relies on. Without it, a build environment
+ * that does not already pass -D_GNU_SOURCE pulls in <string.h> with the XSI
+ * (int) prototype, which then mismatches the _GNU_SOURCE branch below and fails
+ * to compile (seen on stock PHP images that don't set the flag themselves). */
+#ifndef _GNU_SOURCE
+#define _GNU_SOURCE 1
+#endif
+
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
