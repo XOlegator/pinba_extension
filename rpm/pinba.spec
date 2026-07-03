@@ -21,7 +21,7 @@
 %{!?_metainfodir:%global _metainfodir %{_datadir}/metainfo}
 
 Name:           php-pinba
-Version:        1.7.0
+Version:        1.8.0
 Release:        1%{?dist}
 Summary:        Pinba metrics extension for the distro-native PHP
 
@@ -88,6 +88,9 @@ extdir="$(%{_bindir}/php-config --extension-dir)"
 %{_metainfodir}/io.github.xolegator.php-pinba.metainfo.xml
 
 %changelog
+* Fri Jul 03 2026 Oleg Ekhlakov <o.ekhlakov@protonmail.com> - 1.8.0-1
+- support PHP 8.0 and 8.1 (AlmaLinux/RHEL 9 base)
+
 * Fri Jul 03 2026 Oleg Ekhlakov <o.ekhlakov@protonmail.com> - 1.7.0-1
 - packaging: AppStream metainfo, CHANGELOG-sourced release notes, and action updates
 
