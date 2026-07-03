@@ -51,6 +51,9 @@ override_dh_auto_install:
 			debian/$$pkg$$extdir/pinba.so; \
 		install -D -m 644 debian/pinba.ini \
 			debian/$$pkg/etc/php/$$v/mods-available/pinba.ini; \
+		metaid=$$(echo "$$v" | tr -d .); \
+		install -D -m 644 debian/$$pkg.metainfo.xml \
+			debian/$$pkg/usr/share/metainfo/io.github.xolegator.php-pinba-$$metaid.metainfo.xml; \
 		echo "php:Depends=phpapi-$$api" > debian/$$pkg.substvars; \
 	done
 

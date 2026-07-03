@@ -22,9 +22,9 @@ Depends: ${shlibs:Depends}, ${misc:Depends}, ${php:Depends}, php8.2-common
 Provides: php-pinba
 Description: Pinba timer/profiling extension for PHP 8.2
  Pinba measures PHP script execution and sends compact Protocol Buffers
- statistics over UDP to a Pinba server (the pinba_engine MySQL storage
- engine), enabling real-time monitoring of request time, memory usage and
- user-defined timers.
+ statistics over UDP to a Pinba server — the pinba_engine storage engine for
+ MySQL or MariaDB — enabling real-time monitoring of request time, memory usage
+ and user-defined timers.
  .
  This package provides the extension built for PHP 8.2.
 
@@ -34,9 +34,9 @@ Depends: ${shlibs:Depends}, ${misc:Depends}, ${php:Depends}, php8.3-common
 Provides: php-pinba
 Description: Pinba timer/profiling extension for PHP 8.3
  Pinba measures PHP script execution and sends compact Protocol Buffers
- statistics over UDP to a Pinba server (the pinba_engine MySQL storage
- engine), enabling real-time monitoring of request time, memory usage and
- user-defined timers.
+ statistics over UDP to a Pinba server — the pinba_engine storage engine for
+ MySQL or MariaDB — enabling real-time monitoring of request time, memory usage
+ and user-defined timers.
  .
  This package provides the extension built for PHP 8.3.
 
@@ -46,9 +46,9 @@ Depends: ${shlibs:Depends}, ${misc:Depends}, ${php:Depends}, php8.4-common
 Provides: php-pinba
 Description: Pinba timer/profiling extension for PHP 8.4
  Pinba measures PHP script execution and sends compact Protocol Buffers
- statistics over UDP to a Pinba server (the pinba_engine MySQL storage
- engine), enabling real-time monitoring of request time, memory usage and
- user-defined timers.
+ statistics over UDP to a Pinba server — the pinba_engine storage engine for
+ MySQL or MariaDB — enabling real-time monitoring of request time, memory usage
+ and user-defined timers.
  .
  This package provides the extension built for PHP 8.4.
 
@@ -58,8 +58,8 @@ Depends: ${shlibs:Depends}, ${misc:Depends}, ${php:Depends}, php8.5-common
 Provides: php-pinba
 Description: Pinba timer/profiling extension for PHP 8.5
  Pinba measures PHP script execution and sends compact Protocol Buffers
- statistics over UDP to a Pinba server (the pinba_engine MySQL storage
- engine), enabling real-time monitoring of request time, memory usage and
- user-defined timers.
+ statistics over UDP to a Pinba server — the pinba_engine storage engine for
+ MySQL or MariaDB — enabling real-time monitoring of request time, memory usage
+ and user-defined timers.
  .
  This package provides the extension built for PHP 8.5.

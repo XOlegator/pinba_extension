@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="generic">
+  <id>io.github.xolegator.php-pinba-83</id>
+  <pkgname>php8.3-pinba</pkgname>
+  <metadata_license>MIT</metadata_license>
+  <project_license>LGPL-2.1-or-later</project_license>
+
+  <name>Pinba PHP Extension (PHP 8.3)</name>
+  <summary>Timer and profiling extension for PHP 8.3</summary>
+
+  <description>
+    <p>
+      Pinba measures PHP script execution and sends compact Protocol Buffers
+      statistics over UDP to a Pinba server — the pinba_engine storage engine
+      for MySQL or MariaDB — enabling real-time monitoring of request time,
+      memory usage and user-defined timers.
+    </p>
+    <p>
+      This package provides the extension built for PHP 8.3.
+    </p>
+  </description>
+
+  <developer id="io.github.xolegator">
+    <name>Oleg Ekhlakov</name>
+  </developer>
+
+  <url type="homepage">https://github.com/XOlegator/pinba_extension</url>
+  <url type="bugtracker">https://github.com/XOlegator/pinba_extension/issues</url>
+  <url type="vcs-browser">https://github.com/XOlegator/pinba_extension</url>
+
+  <categories>
+    <category>Development</category>
+  </categories>
+
+  <!--
+    The topmost release is refreshed automatically by the PPA publish workflow
+    (.github/workflows/packaging.yml) from the version being packaged, so this
+    list does not need to be bumped by hand on every release.
+  -->
+  <releases>
+    <release version="1.6.0" date="2026-07-02"/>
+  </releases>
+
+  <content_rating type="oars-1.1"/>
+</component>
