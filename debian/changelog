@@ -1,3 +1,9 @@
+php-pinba (1.8.0-1) noble; urgency=medium
+
+  * support PHP 8.0 and 8.1 (AlmaLinux/RHEL 9 base)
+
+ -- Oleg Ekhlakov <o.ekhlakov@protonmail.com>  Fri, 03 Jul 2026 20:13:39 +0000
+
 php-pinba (1.7.0-1) noble; urgency=medium
 
   * packaging: AppStream metainfo, CHANGELOG-sourced release notes, and
