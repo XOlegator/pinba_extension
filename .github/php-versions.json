@@ -13,6 +13,11 @@
       "8.5"
     ]
   },
+  "distro_native_floor": [
+    "8.0",
+    "8.1"
+  ],
+  "distro_native_floor_note": "PHP branches below the upstream-supported set that ship as the default on a still-supported target OS (8.0 is the base php on AlmaLinux/RHEL 9). Maintained by hand and preserved across php.net auto-refresh; kept in the build-and-test matrix so the versions we ship are proven, even though upstream no longer supports them. See docs/support-matrix.md.",
   "notes": {
     "8.2": "security support only until 2026-12-31",
     "8.3": "security support only until 2027-12-31",
