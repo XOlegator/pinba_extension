@@ -36,6 +36,41 @@ triggered by a release-triggering commit — they just do not start a release on
 example, merging a lone `ci(...)` change updates `master` but leaves the released version
 unchanged until the next `feat`/`fix` lands.
 
+## Version Discipline: What Warrants a Release
+
+The upstream version — the `vX.Y.Z` tag, the `pinba-X.Y.Z.tar.gz` source tarball, and
+`PHP_PINBA_VERSION` — tracks the **shipped extension only**. Pick a commit type by *what the
+change actually affects*, not by how big it feels:
+
+- **Extension code** — anything that changes the compiled `pinba.so` or its public behaviour:
+  `pinba.c`, `php_pinba.h`, `config.m4`, `pinba.proto`, `pinba-pb-c.*`. Use `feat:` (a genuinely
+  new user-facing capability → `minor`) or `fix:` (a bug or behaviour correction → `patch`).
+  These cut a new version, tag and tarball.
+- **Everything else** — packaging (`debian/`, `rpm/`), CI and workflows (`.github/`), helper
+  scripts (`scripts/`), documentation (`docs/`, `README.md`, `*.md`) and tests (`tests/`). Use
+  `ci:`, `build:`, `chore:`, `docs:` or `test:`. These do **not** bump the version: the released
+  `.so` is byte-for-byte identical, so no one repackaging our source (Debian/Ubuntu, Fedora/RPM,
+  Remi) has any reason to see a new release.
+
+Why it matters: a new tag forces every downstream repackager to rebuild an identical artefact.
+Packaging or CI churn must never inflate the extension's version.
+
+Two rules of thumb:
+
+- **Prefer `fix` over `feat` for corrections.** `feat` is for new capability only; making
+  previously surprising or incorrect behaviour correct is a `fix` (a `patch`), even when it adds
+  a warning or a log line.
+- **Publish packaging-only changes without a release.** Because they do not cut a version, ship
+  them by re-running the packaging workflows manually (`workflow_dispatch` on `packaging.yml` or
+  `rpm.yml`). For an RPM, a rebuild only needs a `Release` bump — never a new upstream `Version`.
+
+Examples:
+
+- Add an aarch64 RPM target → `ci(rpm): ...` (no release).
+- Fix the extension silently dropping data → `fix: ...` (`patch`).
+- Add a new userland function or timer field → `feat: ...` (`minor`).
+- Reword the README or a metainfo description → `docs: ...` (no release).
+
 ## Required Project Rules
 
 - Work must be merged into `master` only through Pull Requests.
