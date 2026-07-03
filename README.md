@@ -6,7 +6,7 @@
 [![Release](https://img.shields.io/github/v/release/XOlegator/pinba_extension)](https://github.com/XOlegator/pinba_extension/releases/latest)
 [![Packagist](https://img.shields.io/packagist/v/xolegator/pinba_extension?logo=packagist&logoColor=white)](https://packagist.org/packages/xolegator/pinba_extension)
 [![Copr](https://copr.fedorainfracloud.org/coprs/xolegator/pinba/package/php-pinba/status_image/last_build.png)](https://copr.fedorainfracloud.org/coprs/xolegator/pinba/)
-[![PHP](https://img.shields.io/badge/PHP-8.2%20%7C%208.3%20%7C%208.4%20%7C%208.5-777BB4?logo=php&logoColor=white)](https://github.com/XOlegator/pinba_extension/blob/master/.github/php-versions.json)
+[![PHP](https://img.shields.io/badge/PHP-8.0%20%E2%80%93%208.5-777BB4?logo=php&logoColor=white)](https://github.com/XOlegator/pinba_extension/blob/master/docs/support-matrix.md)
 [![License: LGPL-2.1](https://img.shields.io/badge/license-LGPL--2.1-blue)](https://github.com/XOlegator/pinba_extension/blob/master/COPYING)
 
 Pinba Extension is the PHP client extension for the Pinba monitoring stack. It collects timing
@@ -124,8 +124,11 @@ sudo dnf copr enable xolegator/pinba
 sudo dnf install php-pinba
 ```
 
-This builds for the OS's default PHP (Fedora 43 → 8.4, Fedora 44 → 8.5, Enterprise Linux 9 → 8.1
-from AppStream, Enterprise Linux 10 → 8.3) and ships its ini at `/etc/php.d/40-pinba.ini`.
+This builds for the OS's default PHP (Fedora 43 → 8.4, Fedora 44 → 8.5, Enterprise Linux 9 → 8.0,
+Enterprise Linux 10 → 8.3) and ships its ini at `/etc/php.d/40-pinba.ini`. On AlmaLinux/RHEL 9 the
+default `dnf install php` is the non-modular PHP 8.0 — you don't need to enable any module stream.
+Although PHP 8.0 is past upstream end-of-life, Enterprise Linux backports security fixes to it for
+the life of the OS, so this fork supports it there too (minimum supported PHP is **8.0**).
 
 #### Specific / parallel PHP versions — Remi
 

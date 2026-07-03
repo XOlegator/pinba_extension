@@ -46,21 +46,41 @@ jobs:
   # breakage on every relevant change. No Remi: the extension builds against the
   # distro-native PHP (php-devel), so no third-party repo is needed.
   build-rpm:
-    name: Build RPM (Fedora)
+    name: Build RPM (${{ matrix.image }})
     if: github.event_name == 'push' || github.event_name == 'pull_request'
     runs-on: ubuntu-latest
-    container: fedora:44
+    strategy:
+      fail-fast: false
+      matrix:
+        # fedora:44 covers the current Fedora PHP; almalinux:9 proves the base
+        # php-pinba builds and loads against Enterprise Linux 9's default PHP
+        # (the non-modular php 8.0), which is what base-OS AlmaLinux/RHEL 9 users
+        # get. The spec's %check loads the freshly built extension, so a green
+        # build here is also a load test.
+        image: [fedora:44, almalinux:9]
+    container: ${{ matrix.image }}
     steps:
       - name: Install tooling
-        run: dnf -y install dnf-plugins-core rpm-build rpmlint git-core tar gzip
+        run: |
+          dnf -y install dnf-plugins-core rpm-build rpmlint git-core tar gzip
+          # Enterprise Linux ships protobuf-c-devel in CodeReady Builder (CRB),
+          # not the base repos, and needs EPEL enabled for it too; Fedora has it
+          # in the base repos.
+          . /etc/os-release
+          case "$PLATFORM_ID" in
+            platform:el*)
+              dnf -y install epel-release
+              dnf config-manager --set-enabled crb
+              ;;
+          esac
 
       - name: Checkout
         uses: actions/checkout@v7
 
-      - name: Build SRPM + RPMs
+      - name: Build SRPM + RPMs (the spec %check loads the extension)
         run: |
           ver=$(awk '/^Version:/{print $2; exit}' rpm/pinba.spec)
-          echo "Building php-pinba $ver"
+          echo "Building php-pinba $ver on ${{ matrix.image }}"
           bash rpm/build-srpm.sh "$ver" --rpms
 
       - name: rpmlint (informational)

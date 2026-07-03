@@ -23,7 +23,7 @@
         "source": "https://github.com/XOlegator/pinba_extension"
     },
     "require": {
-        "php": ">=8.2"
+        "php": ">=8.0"
     },
     "php-ext": {
         "extension-name": "pinba",

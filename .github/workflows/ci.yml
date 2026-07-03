@@ -28,7 +28,7 @@ jobs:
 
       - name: Read PHP support matrix
         id: read-matrix
-        run: echo "php-versions=$(jq -c '.targets.php' .github/php-versions.json)" >> "$GITHUB_OUTPUT"
+        run: echo "php-versions=$(jq -c '(.targets.php + (.distro_native_floor // [])) | unique' .github/php-versions.json)" >> "$GITHUB_OUTPUT"
 
   build-and-test:
     needs: matrix
