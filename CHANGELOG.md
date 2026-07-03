@@ -5,6 +5,13 @@ All notable changes in this fork are tracked here by release automation.
 Historical upstream release notes are preserved in `docs/legacy-news.md` (curated) and
 `docs/legacy-upstream-news.md` (verbatim upstream `NEWS`).
 
+## [1.7.0](https://github.com/XOlegator/pinba_extension/compare/v1.6.0...v1.7.0) (2026-07-03)
+
+
+### Features
+
+* **packaging:** AppStream metainfo, CHANGELOG-sourced release notes, and action updates ([#65](https://github.com/XOlegator/pinba_extension/issues/65)) ([12c3ed8](https://github.com/XOlegator/pinba_extension/commit/12c3ed8607ea7c2db34ea9922d06bb4fbfcfc5f7))
+
 ## [1.6.0](https://github.com/XOlegator/pinba_extension/compare/v1.5.0...v1.6.0) (2026-07-02)
 
 
