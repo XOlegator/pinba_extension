@@ -21,7 +21,7 @@
 %{!?_metainfodir:%global _metainfodir %{_datadir}/metainfo}
 
 Name:           php-pinba
-Version:        1.6.0
+Version:        1.7.0
 Release:        1%{?dist}
 Summary:        Pinba metrics extension for the distro-native PHP
 
@@ -88,6 +88,9 @@ extdir="$(%{_bindir}/php-config --extension-dir)"
 %{_metainfodir}/io.github.xolegator.php-pinba.metainfo.xml
 
 %changelog
+* Fri Jul 03 2026 Oleg Ekhlakov <o.ekhlakov@protonmail.com> - 1.7.0-1
+- packaging: AppStream metainfo, CHANGELOG-sourced release notes, and action updates
+
 * Thu Jul 02 2026 Oleg Ekhlakov <o.ekhlakov@protonmail.com> - 1.6.0-1
 - Release 1.6.0; see CHANGELOG.md for details.
 
