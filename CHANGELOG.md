@@ -5,6 +5,13 @@ All notable changes in this fork are tracked here by release automation.
 Historical upstream release notes are preserved in `docs/legacy-news.md` (curated) and
 `docs/legacy-upstream-news.md` (verbatim upstream `NEWS`).
 
+## [1.8.1](https://github.com/XOlegator/pinba_extension/compare/v1.8.0...v1.8.1) (2026-07-17)
+
+
+### Bug Fixes
+
+* reject invalid float timing inputs ([#70](https://github.com/XOlegator/pinba_extension/issues/70)) ([5c71d1d](https://github.com/XOlegator/pinba_extension/commit/5c71d1d3c72cf9ae24632c6b7f9e7bd0b4308eb7))
+
 ## [1.8.0](https://github.com/XOlegator/pinba_extension/compare/v1.7.0...v1.8.0) (2026-07-03)
 
 
