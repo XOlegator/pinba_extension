@@ -2373,8 +2373,9 @@ static void php_pinba_client_timer_add_set(INTERNAL_FUNCTION_PARAMETERS, int add
     }
 
     if (!php_pinba_is_valid_wire_float(ru_utime) || !php_pinba_is_valid_wire_float(ru_stime)) {
-      php_error_docref(NULL, E_WARNING,
-                       "timer rusage values must be finite, non-negative and fit into a Pinba float");
+      php_error_docref(
+          NULL, E_WARNING,
+          "timer rusage values must be finite, non-negative and fit into a Pinba float");
       RETURN_FALSE;
     }
   }
