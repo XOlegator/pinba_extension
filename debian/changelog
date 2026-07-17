@@ -1,3 +1,9 @@
+php-pinba (1.8.1-1) noble; urgency=medium
+
+  * reject invalid float timing inputs
+
+ -- Oleg Ekhlakov <o.ekhlakov@protonmail.com>  Fri, 17 Jul 2026 14:01:38 +0000
+
 php-pinba (1.8.0-1) noble; urgency=medium
 
   * support PHP 8.0 and 8.1 (AlmaLinux/RHEL 9 base)
