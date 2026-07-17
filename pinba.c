@@ -37,6 +37,8 @@
 #endif
 
 #include <arpa/inet.h>
+#include <float.h>
+#include <math.h>
 #include <netdb.h>
 #include <netinet/in.h>
 #include <stdint.h>
@@ -178,6 +180,12 @@ static inline pinba_client_t *php_pinba_client_object(zend_object *obj) {
     (t).tv_sec = (int)(f);                                       \
     (t).tv_usec = (int)(((f) - (double)(t).tv_sec) * 1000000.0); \
   } while (0);
+
+static inline int php_pinba_is_valid_wire_float(double value) /* {{{ */
+{
+  return isfinite(value) && value >= 0 && value <= (double)FLT_MAX;
+}
+/* }}} */
 
 #ifndef timersub
 #define timersub(a, b, result)                       \
@@ -1450,6 +1458,10 @@ static PHP_FUNCTION(pinba_timer_add) {
   if (value < 0) {
     php_error_docref(NULL, E_WARNING, "negative time value passed (%f), changing it to 0", value);
     value = 0;
+  } else if (!php_pinba_is_valid_wire_float(value)) {
+    php_error_docref(NULL, E_WARNING,
+                     "non-finite or overflowing time value passed, changing it to 0");
+    value = 0;
   }
 
   t = php_pinba_timer_ctor(tags, tags_num);
@@ -2017,6 +2029,10 @@ static PHP_FUNCTION(pinba_request_time_set) {
     php_error_docref(NULL, E_WARNING, "negative request time value passed (%f), changing it to 0",
                      time);
     time = 0;
+  } else if (!php_pinba_is_valid_wire_float(time)) {
+    php_error_docref(NULL, E_WARNING,
+                     "non-finite or overflowing request time value passed, changing it to 0");
+    time = 0;
   }
 
   PINBA_G(request_time) = time;
@@ -2205,7 +2221,28 @@ SET_METHOD_NUM(setMemoryFootprint, memory_footprint, long, "l");
 SET_METHOD_NUM(setMemoryPeak, memory_peak, long, "l");
 SET_METHOD_NUM(setDocumentSize, document_size, long, "l");
 SET_METHOD_NUM(setStatus, status, long, "l");
-SET_METHOD_NUM(setRequestTime, request_time, double, "d");
+
+/* {{{ proto bool PinbaClient::setRequestTime(float request_time)
+ */
+static PHP_METHOD(PinbaClient, setRequestTime) {
+  pinba_client_t *client;
+  double value;
+
+  if (zend_parse_parameters(ZEND_NUM_ARGS(), "d", &value) != SUCCESS) {
+    return;
+  }
+
+  if (!php_pinba_is_valid_wire_float(value)) {
+    php_error_docref(NULL, E_WARNING,
+                     "request_time must be finite, non-negative and fit into a Pinba float");
+    RETURN_FALSE;
+  }
+
+  client = Z_PINBACLIENT_P(getThis());
+  client->request_time = value;
+  RETURN_TRUE;
+}
+/* }}} */
 
 /* {{{ proto bool PinbaClient::setRusage(array rusage)
  */
@@ -2230,6 +2267,11 @@ static PHP_METHOD(PinbaClient, setRusage) {
        ((tmp = zend_hash_get_current_data(Z_ARRVAL_P(rusage))) != NULL) && i < 2;
        zend_hash_move_forward(Z_ARRVAL_P(rusage)), i++) {
     client->rusage[i] = zval_get_double(tmp);
+    if (!php_pinba_is_valid_wire_float(client->rusage[i])) {
+      php_error_docref(NULL, E_WARNING,
+                       "rusage values must be finite, non-negative and fit into a Pinba float");
+      RETURN_FALSE;
+    }
   }
   RETURN_TRUE;
 }
@@ -2301,6 +2343,12 @@ static void php_pinba_client_timer_add_set(INTERNAL_FUNCTION_PARAMETERS, int add
     RETURN_FALSE;
   }
 
+  if (!php_pinba_is_valid_wire_float(value)) {
+    php_error_docref(NULL, E_WARNING,
+                     "timer value must be finite, non-negative and fit into a Pinba float");
+    RETURN_FALSE;
+  }
+
   if (hit_count < 0) {
     php_error_docref(NULL, E_WARNING, "timer hit count cannot be less than 0");
     RETURN_FALSE;
@@ -2322,6 +2370,12 @@ static void php_pinba_client_timer_add_set(INTERNAL_FUNCTION_PARAMETERS, int add
       } else {
         ru_stime = zval_get_double(tmp);
       }
+    }
+
+    if (!php_pinba_is_valid_wire_float(ru_utime) || !php_pinba_is_valid_wire_float(ru_stime)) {
+      php_error_docref(NULL, E_WARNING,
+                       "timer rusage values must be finite, non-negative and fit into a Pinba float");
+      RETURN_FALSE;
     }
   }
 
