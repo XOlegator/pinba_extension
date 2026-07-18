@@ -248,7 +248,7 @@ static inline pinba_collector *php_pinba_collector_add(pinba_collector *collecto
 static inline void php_pinba_cleanup_collectors(pinba_collector *collectors,
                                                 unsigned int *n_collectors) /* {{{ */
 {
-  int i;
+  unsigned int i;
 
   for (i = 0; i < *n_collectors; i++) {
     pinba_collector *collector = &collectors[i];
@@ -471,8 +471,8 @@ static void php_timer_resource_dtor(zend_resource *entry) /* {{{ */
 }
 /* }}} */
 
-static int php_pinba_timer_stop_helper(zval *zv, int num_args, va_list args,
-                                       zend_hash_key *hash_key) /* {{{ */
+static int php_pinba_timer_stop_helper(zval *zv, int num_args ZEND_ATTRIBUTE_UNUSED, va_list args,
+                                       zend_hash_key *hash_key ZEND_ATTRIBUTE_UNUSED) /* {{{ */
 {
   if (Z_RES_TYPE_P(zv) == le_pinba_timer) {
     long flags = va_arg(args, long);

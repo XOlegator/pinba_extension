@@ -28,12 +28,13 @@ jobs:
         with:
           python-version: '3.x'
 
-      # clang-format is the local clang-format hook; shellcheck lets the
-      # actionlint hook validate embedded run-step scripts.
+      # clang-format comes pinned from the pre-commit mirror hook (version
+      # parity with local runs); shellcheck lets the actionlint hook validate
+      # embedded run-step scripts.
       - name: Install hook system dependencies
         run: |
           sudo apt-get update -q
-          sudo apt-get install -y --no-install-recommends clang-format shellcheck
+          sudo apt-get install -y --no-install-recommends shellcheck
 
       - name: Cache pre-commit environments
         uses: actions/cache@v6

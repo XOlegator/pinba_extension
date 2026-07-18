@@ -10,4 +10,10 @@ ColumnLimit: 100
 IndentWidth: 2
 TabWidth: 2
 UseTab: Never
+# Google style defaults to DerivePointerAlignment: true, which guesses the
+# alignment per file and can flip between clang-format versions. Pin the
+# classic C style (`char *ptr`) explicitly, same as the sibling pinba_engine
+# repository and php-src itself.
+DerivePointerAlignment: false
+PointerAlignment: Right
 ---

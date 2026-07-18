@@ -55,13 +55,18 @@ repos:
     hooks:
       - id: shellcheck
 
-  - repo: local
+  # Pinned via the official mirror so local runs and CI format identically —
+  # a `language: system` hook floats with whatever clang-format the host has,
+  # which made commits pass locally and fail in CI (or vice versa).
+  - repo: https://github.com/pre-commit/mirrors-clang-format
+    rev: v22.1.8
     hooks:
       - id: clang-format
         name: clang-format (C)
-        language: system
-        entry: clang-format --dry-run --Werror
         files: '^(pinba\.c|php_pinba\.h)$'
+
+  - repo: local
+    hooks:
       - id: clang-tidy
         name: clang-tidy (C)
         language: system
