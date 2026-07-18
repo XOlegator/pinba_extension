@@ -21,7 +21,7 @@
 %{!?_metainfodir:%global _metainfodir %{_datadir}/metainfo}
 
 Name:           php-pinba
-Version:        1.8.1
+Version:        1.8.2
 Release:        1%{?dist}
 Summary:        Pinba metrics extension for the distro-native PHP
 
@@ -88,6 +88,9 @@ extdir="$(%{_bindir}/php-config --extension-dir)"
 %{_metainfodir}/io.github.xolegator.php-pinba.metainfo.xml
 
 %changelog
+* Sat Jul 18 2026 Oleg Ekhlakov <o.ekhlakov@protonmail.com> - 1.8.2-1
+- build with PHP 8.6 (release follow-up for #72)
+
 * Fri Jul 17 2026 Oleg Ekhlakov <o.ekhlakov@protonmail.com> - 1.8.1-1
 - reject invalid float timing inputs
 
