@@ -5,6 +5,13 @@ All notable changes in this fork are tracked here by release automation.
 Historical upstream release notes are preserved in `docs/legacy-news.md` (curated) and
 `docs/legacy-upstream-news.md` (verbatim upstream `NEWS`).
 
+## [1.8.2](https://github.com/XOlegator/pinba_extension/compare/v1.8.1...v1.8.2) (2026-07-18)
+
+
+### Bug Fixes
+
+* build with PHP 8.6 (release follow-up for [#72](https://github.com/XOlegator/pinba_extension/issues/72)) ([981d0ba](https://github.com/XOlegator/pinba_extension/commit/981d0ba99107712a004793af7a4544fed03c7ab9))
+
 ## [1.8.1](https://github.com/XOlegator/pinba_extension/compare/v1.8.0...v1.8.1) (2026-07-17)
 
 
