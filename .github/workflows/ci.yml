@@ -102,6 +102,54 @@ jobs:
           if-no-files-found: ignore
           retention-days: 14
 
+  # Pre-release PHP branches are built in advisory mode: the job runs on every
+  # push/PR but never fails the workflow (continue-on-error), so upstream alpha
+  # breakage is visible early without blocking merges. Move the version into
+  # .github/php-versions.json once php.net lists it as supported.
+  build-experimental:
+    name: Build and test / PHP ${{ matrix.php-version }} (experimental)
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    strategy:
+      fail-fast: false
+      matrix:
+        php-version:
+          - '8.6'
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php-version }}
+          coverage: none
+          tools: phpize
+
+      - name: Show toolchain
+        run: |
+          php -v
+          phpize -v
+          php-config --version
+
+      - name: Install build dependencies
+        run: |
+          sudo apt-get update -q
+          sudo apt-get install -y --no-install-recommends libprotobuf-c-dev
+
+      - name: Prepare build
+        run: phpize
+
+      - name: Configure
+        run: ./configure --enable-pinba
+
+      - name: Build
+        run: make -j"$(nproc)"
+
+      - name: Test
+        run: make test NO_INTERACTION=1 REPORT_EXIT_STATUS=1
+
   coverage:
     name: Coverage (C, gcov)
     runs-on: ubuntu-latest
