@@ -160,7 +160,7 @@ typedef struct _pinba_timer { /* {{{ */
   }
 
 static inline pinba_client_t *php_pinba_client_object(zend_object *obj) {
-  return (pinba_client_t *)((char *)(obj)-XtOffsetOf(pinba_client_t, std));
+  return (pinba_client_t *)((char *)(obj)-offsetof(pinba_client_t, std));
 }
 
 #define Z_PINBACLIENT_P(zv) php_pinba_client_object(Z_OBJ_P(zv))
@@ -2800,7 +2800,7 @@ static PHP_MINIT_FUNCTION(pinba) {
   pinba_client_handlers.dtor_obj = pinba_client_object_dtor;
   pinba_client_handlers.free_obj = pinba_client_free_storage;
   pinba_client_handlers.clone_obj = NULL;
-  pinba_client_handlers.offset = XtOffsetOf(pinba_client_t, std);
+  pinba_client_handlers.offset = offsetof(pinba_client_t, std);
 
   zend_hash_init(&resolver_cache, 10, NULL, php_pinba_sa_dtor, 1);
   return SUCCESS;
