@@ -471,8 +471,7 @@ static void php_timer_resource_dtor(zend_resource *entry) /* {{{ */
 }
 /* }}} */
 
-static int php_pinba_timer_stop_helper(zval *zv, int num_args ZEND_ATTRIBUTE_UNUSED,
-                                       va_list args,
+static int php_pinba_timer_stop_helper(zval *zv, int num_args ZEND_ATTRIBUTE_UNUSED, va_list args,
                                        zend_hash_key *hash_key ZEND_ATTRIBUTE_UNUSED) /* {{{ */
 {
   if (Z_RES_TYPE_P(zv) == le_pinba_timer) {
