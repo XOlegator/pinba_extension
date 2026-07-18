@@ -68,7 +68,12 @@ jobs:
         run: phpize
 
       - name: Configure
-        run: ./configure --enable-pinba
+        # -Werror=deprecated-declarations: fail the build as soon as the
+        # extension calls anything php-src marks ZEND_DEPRECATED, so upcoming
+        # API removals surface before the symbol disappears. Note this cannot
+        # catch macro removals (e.g. XtOffsetOf in 8.6) - macros have no
+        # deprecation mechanism; the experimental pre-release job covers those.
+        run: ./configure --enable-pinba CFLAGS="-Werror=deprecated-declarations"
 
       - name: Build
         run: make -j"$(nproc)"
@@ -142,7 +147,12 @@ jobs:
         run: phpize
 
       - name: Configure
-        run: ./configure --enable-pinba
+        # -Werror=deprecated-declarations: fail the build as soon as the
+        # extension calls anything php-src marks ZEND_DEPRECATED, so upcoming
+        # API removals surface before the symbol disappears. Note this cannot
+        # catch macro removals (e.g. XtOffsetOf in 8.6) - macros have no
+        # deprecation mechanism; the experimental pre-release job covers those.
+        run: ./configure --enable-pinba CFLAGS="-Werror=deprecated-declarations"
 
       - name: Build
         run: make -j"$(nproc)"
