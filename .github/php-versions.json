@@ -1,27 +1,27 @@
 {
-  "generated_at": "2026-06-07",
-  "source": "https://www.php.net/supported-versions.php",
-  "targets": {
-    "ubuntu": [
-      "24.04",
-      "26.04"
+    "generated_at": "2026-08-31",
+    "source": "https://www.php.net/supported-versions.php",
+    "targets": {
+        "ubuntu": [
+            "24.04",
+            "26.04"
+        ],
+        "php": [
+            "8.2",
+            "8.3",
+            "8.4",
+            "8.5"
+        ]
+    },
+    "distro_native_floor": [
+        "8.0",
+        "8.1"
     ],
-    "php": [
-      "8.2",
-      "8.3",
-      "8.4",
-      "8.5"
-    ]
-  },
-  "distro_native_floor": [
-    "8.0",
-    "8.1"
-  ],
-  "distro_native_floor_note": "PHP branches below the upstream-supported set that ship as the default on a still-supported target OS (8.0 is the base php on AlmaLinux/RHEL 9). Maintained by hand and preserved across php.net auto-refresh; kept in the build-and-test matrix so the versions we ship are proven, even though upstream no longer supports them. See docs/support-matrix.md.",
-  "notes": {
-    "8.2": "security support only until 2026-12-31",
-    "8.3": "security support only until 2027-12-31",
-    "8.4": "active support until 2026-12-31",
-    "8.5": "active support until 2027-12-31"
-  }
+    "distro_native_floor_note": "PHP branches below the upstream-supported set that ship as the default on a still-supported target OS (8.0 is the base php on AlmaLinux/RHEL 9). Maintained by hand and preserved across php.net auto-refresh; kept in the build-and-test matrix so the versions we ship are proven, even though upstream no longer supports them. See docs/support-matrix.md.",
+    "notes": {
+        "8.2": "active support until 3 years, 8 months ago",
+        "8.3": "active support until 2 years, 9 months ago",
+        "8.4": "active support until 1 year, 9 months ago",
+        "8.5": "active support until 9 months ago"
+    }
 }
