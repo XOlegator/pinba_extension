@@ -21,7 +21,7 @@
 %{!?_metainfodir:%global _metainfodir %{_datadir}/metainfo}
 
 Name:           php-pinba
-Version:        1.8.2
+Version:        1.8.3
 Release:        1%{?dist}
 Summary:        Pinba metrics extension for the distro-native PHP
 
@@ -88,6 +88,9 @@ extdir="$(%{_bindir}/php-config --extension-dir)"
 %{_metainfodir}/io.github.xolegator.php-pinba.metainfo.xml
 
 %changelog
+* Fri Nov 20 2026 Oleg Ekhlakov <o.ekhlakov@protonmail.com> - 1.8.3-1
+- support PHP 8.6 in release builds
+
 * Sat Jul 18 2026 Oleg Ekhlakov <o.ekhlakov@protonmail.com> - 1.8.2-1
 - build with PHP 8.6 (release follow-up for #72)
 
