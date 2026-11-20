@@ -18,7 +18,8 @@ permissions:
 jobs:
   check:
     name: Bindings match pinba.proto
-    runs-on: ubuntu-latest
+    # The committed bindings were generated with Noble’s protobuf-c 1.4.1.
+    runs-on: ubuntu-24.04
 
     steps:
       - name: Checkout
