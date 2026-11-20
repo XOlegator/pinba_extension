@@ -168,7 +168,9 @@ jobs:
             php8.2-dev \
             php8.3-dev \
             php8.4-dev \
-            php8.5-dev
+            php8.5-dev \
+            php8.6-cli \
+            php8.6-dev
 
       - name: Build orig tarball
         run: |
@@ -179,6 +181,11 @@ jobs:
 
       - name: Build binary packages
         run: dpkg-buildpackage -b -us -uc
+
+      - name: Install and load the PHP 8.6 package
+        run: |
+          sudo apt-get install -y ../php8.6-pinba_*_*.deb
+          php8.6 -m | grep -qx pinba
 
       - name: Run lintian
         run: lintian --fail-on error ../php-pinba_*_amd64.changes
@@ -323,8 +330,7 @@ jobs:
             # suite's build farm (php-ppa-build.mk already drops the binaries for
             # the rest). Without this the source package build-depends on
             # php<ver>-dev that the suite cannot provide and stays in
-            # "Dependency wait" on Launchpad — e.g. resolute (26.04) only ships
-            # php8.5 and ondrej/php has no resolute series.
+            # "Dependency wait" on Launchpad.
             read -ra suite_versions <<< "$versions"
             bd=$(printf ' php%s-dev,\n' "${suite_versions[@]}")
             awk -v bd="$bd" '

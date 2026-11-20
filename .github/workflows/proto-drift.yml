@@ -27,14 +27,16 @@ jobs:
       - name: Install protobuf-c compiler
         run: |
           sudo apt-get update -q
-          sudo apt-get install -y --no-install-recommends protobuf-c-compiler
+          sudo apt-get install -y --no-install-recommends protobuf-c-compiler protobuf-compiler
 
       - name: Show generator version
-        run: protoc-c --version
+        run: |
+          protoc --version
+          dpkg-query -W protobuf-c-compiler
 
       - name: Regenerate bindings from pinba.proto
         run: |
-          protoc-c --c_out=. pinba.proto
+          protoc --c_out=. pinba.proto
           mv -f pinba.pb-c.c pinba-pb-c.c
 
       - name: Verify committed bindings are in sync
@@ -42,7 +44,7 @@ jobs:
           if ! git diff --quiet -- pinba-pb-c.c pinba.pb-c.h; then
             echo "::error::Committed protobuf bindings are out of sync with pinba.proto."
             echo "Regenerate and commit them with:"
-            echo "  protoc-c --c_out=. pinba.proto && mv -f pinba.pb-c.c pinba-pb-c.c"
+            echo "  protoc --c_out=. pinba.proto && mv -f pinba.pb-c.c pinba-pb-c.c"
             git --no-pager diff -- pinba-pb-c.c pinba.pb-c.h
             exit 1
           fi

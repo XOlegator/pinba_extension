@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-06-07",
+  "generated_at": "2026-11-20",
   "source": "https://www.php.net/supported-versions.php",
   "targets": {
     "ubuntu": [
@@ -10,7 +10,8 @@
       "8.2",
       "8.3",
       "8.4",
-      "8.5"
+      "8.5",
+      "8.6"
     ]
   },
   "distro_native_floor": [
@@ -22,6 +23,7 @@
     "8.2": "security support only until 2026-12-31",
     "8.3": "security support only until 2027-12-31",
     "8.4": "active support until 2026-12-31",
-    "8.5": "active support until 2027-12-31"
+    "8.5": "active support until 2027-12-31",
+    "8.6": "active support until 2028-12-31"
   }
 }

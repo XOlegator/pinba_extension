@@ -8,8 +8,9 @@ The current active development baseline targets these PHP branches:
 - `PHP 8.3`
 - `PHP 8.4`
 - `PHP 8.5`
+- `PHP 8.6`
 
-Older PHP branches are not part of the active support matrix for this fork.
+CI also covers PHP 8.0 and 8.1 for Enterprise Linux 9 compatibility.
 
 The machine-readable source of truth for that matrix is:
 
@@ -17,27 +18,19 @@ The machine-readable source of truth for that matrix is:
 
 ## Build Dependencies
 
-The extension links against the system **protobuf-c** runtime (it is no longer
-vendored). Required at build time:
-
-- `libprotobuf-c-dev` (headers + `pkg-config` entry, `>= 1.0.0`)
-- `protobuf-c-compiler` (`protoc-c`) — only needed to regenerate the bindings,
-  not for a normal build
-
-At runtime the shared library `libprotobuf-c1` is required.
-
-On Debian/Ubuntu:
+The extension links against the system **protobuf-c** runtime. A normal build
+requires `libprotobuf-c-dev` (version 1.3.0 or later). On Debian and Ubuntu:
 
 ```bash
-sudo apt-get install -y libprotobuf-c-dev protobuf-c-compiler
+sudo apt-get install -y libprotobuf-c-dev
 ```
 
-The C bindings `pinba-pb-c.c` / `pinba.pb-c.h` are generated from `pinba.proto`
-and committed to the repository, so a normal build does not invoke `protoc-c`.
-To regenerate them after changing `pinba.proto`:
+The C bindings `pinba-pb-c.c` and `pinba.pb-c.h` are committed to the repository.
+To regenerate them, use `protoc` from `protobuf-compiler` and the `protoc-gen-c`
+1.5.1 plugin from `protobuf-c-compiler` on Ubuntu 26.04:
 
 ```bash
-protoc-c --c_out=. pinba.proto
+protoc --c_out=. pinba.proto
 mv pinba.pb-c.c pinba-pb-c.c   # match the filename used by config.m4
 ```
 
@@ -114,11 +107,8 @@ tools/run-tests.sh valgrind   # run each test under Valgrind memcheck (needs val
 
 GitHub Actions currently validates:
 
-- build on `PHP 8.2`
-- build on `PHP 8.3`
-- build on `PHP 8.4`
-- build on `PHP 8.5`
-- PHPT execution on the same matrix
+- required builds and PHPT tests on PHP 8.0–8.6
+- experimental, non-blocking build and PHPT tests on PHP 8.7 nightly
 - C code coverage (gcov/gcovr) uploaded to Codecov
 - AddressSanitizer + UBSan run of the PHPT suite against an ASan-instrumented PHP
 - a thread-safe (ZTS) build, run against the PHPT suite under ASan/UBSan

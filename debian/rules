@@ -10,7 +10,7 @@ ifneq ($(wildcard debian/php-ppa-build.mk),)
 include debian/php-ppa-build.mk
 endif
 
-ALL_VERSIONS := 8.2 8.3 8.4 8.5
+ALL_VERSIONS := 8.2 8.3 8.4 8.5 8.6
 PHP_VERSIONS ?= $(ALL_VERSIONS)
 
 # Binary packages for versions not selected are excluded from the build.
