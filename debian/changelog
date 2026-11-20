@@ -1,3 +1,9 @@
+php-pinba (1.8.3-1) noble; urgency=medium
+
+  * support PHP 8.6 in release builds
+
+ -- Oleg Ekhlakov <o.ekhlakov@protonmail.com>  Fri, 20 Nov 2026 20:44:15 +0000
+
 php-pinba (1.8.2-1) noble; urgency=medium
 
   * build with PHP 8.6 (release follow-up for #72)
