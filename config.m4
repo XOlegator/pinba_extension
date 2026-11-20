@@ -10,10 +10,10 @@ if test "$PHP_PINBA" != "no"; then
 
   dnl Pinba serializes packets with the protobuf-c runtime. The runtime is no
   dnl longer vendored in this repository; link against the system libprotobuf-c
-  dnl (>= 1.0.0). The C bindings in pinba-pb-c.c / pinba.pb-c.h are generated
+  dnl (>= 1.3.0). The C bindings in pinba-pb-c.c / pinba.pb-c.h are generated
   dnl from pinba.proto with protoc-gen-c and include <protobuf-c/protobuf-c.h>.
   AC_PATH_PROG(PKG_CONFIG, pkg-config, no)
-  if test "$PKG_CONFIG" != "no" && $PKG_CONFIG --atleast-version=1.0.0 libprotobuf-c; then
+  if test "$PKG_CONFIG" != "no" && $PKG_CONFIG --atleast-version=1.3.0 libprotobuf-c; then
     PROTOBUF_C_CFLAGS=`$PKG_CONFIG --cflags libprotobuf-c`
     PROTOBUF_C_LIBS=`$PKG_CONFIG --libs libprotobuf-c`
   else

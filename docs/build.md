@@ -18,27 +18,19 @@ The machine-readable source of truth for that matrix is:
 
 ## Build Dependencies
 
-The extension links against the system **protobuf-c** runtime (it is no longer
-vendored). Required at build time:
-
-- `libprotobuf-c-dev` (headers + `pkg-config` entry, `>= 1.0.0`)
-- `protobuf-c-compiler` (`protoc-c`) — only needed to regenerate the bindings,
-  not for a normal build
-
-At runtime the shared library `libprotobuf-c1` is required.
-
-On Debian/Ubuntu:
+The extension links against the system **protobuf-c** runtime. A normal build
+requires `libprotobuf-c-dev` (version 1.3.0 or later). On Debian and Ubuntu:
 
 ```bash
-sudo apt-get install -y libprotobuf-c-dev protobuf-c-compiler
+sudo apt-get install -y libprotobuf-c-dev
 ```
 
-The C bindings `pinba-pb-c.c` / `pinba.pb-c.h` are generated from `pinba.proto`
-and committed to the repository, so a normal build does not invoke `protoc-c`.
-To regenerate them after changing `pinba.proto`:
+The C bindings `pinba-pb-c.c` and `pinba.pb-c.h` are committed to the repository.
+To regenerate them, use `protoc` from `protobuf-compiler` and the `protoc-gen-c`
+1.5.1 plugin from `protobuf-c-compiler` on Ubuntu 26.04:
 
 ```bash
-protoc-c --c_out=. pinba.proto
+protoc --c_out=. pinba.proto
 mv pinba.pb-c.c pinba-pb-c.c   # match the filename used by config.m4
 ```
 

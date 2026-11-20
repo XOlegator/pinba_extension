@@ -49,8 +49,7 @@ jobs:
 
   clang-tidy:
     name: clang-tidy
-    # Keep the analyzer on Noble’s Clang 18 baseline.
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v7

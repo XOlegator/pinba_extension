@@ -174,7 +174,7 @@ static inline pinba_client_t *php_pinba_client_object(zend_object *obj) {
     (a)->tv_sec = (b)->tv_sec;   \
     (a)->tv_usec = (b)->tv_usec; \
   } while (0);
-#define timeval_to_float(t) ((float)(t).tv_sec + (float)(t).tv_usec / 1000000.0)
+#define timeval_to_float(t) ((float)(t).tv_sec + ((float)(t).tv_usec / 1000000.0))
 #define float_to_timeval(f, t)                                   \
   do {                                                           \
     (t).tv_sec = (int)(f);                                       \
@@ -743,7 +743,7 @@ static inline Pinba__Request *php_create_pinba_packet(pinba_client_t *client,
 
     request->status = SG(sapi_headers).http_response_code;
     request->has_status = 1;
-#if defined(PINBA_USE_MALLINFO2)
+#ifdef PINBA_USE_MALLINFO2
     {
       struct mallinfo2 info;
 
@@ -1179,6 +1179,8 @@ static int php_pinba_array_to_tags(HashTable *array, pinba_timer_tag_t ***tags) 
   zend_hash_sort(array, php_pinba_key_compare, 0);
 
   *tags = (pinba_timer_tag_t **)ecalloc(num, sizeof(pinba_timer_tag_t *));
+  // Zend walks hash bucket storage through its internal layout.
+  // NOLINTNEXTLINE(clang-analyzer-security.ArrayBound,readability-math-missing-parentheses)
   ZEND_HASH_FOREACH_STR_KEY_VAL_IND(array, tag_name_str, value) {
     zend_string *str;
 
@@ -2618,6 +2620,8 @@ ZEND_END_ARG_INFO()
 
 /* {{{ pinba_functions[]
  */
+// Zend computes argument counts inside PHP_FE and PHP_ME.
+// NOLINTBEGIN(readability-math-missing-parentheses)
 zend_function_entry pinba_functions[] = {
     PINBA_FUNC(pinba_timer_start) PINBA_FUNC(pinba_timer_add) PINBA_FUNC(pinba_timer_stop)
         PINBA_FUNC(pinba_timer_delete) PINBA_FUNC(pinba_timer_data_merge)
@@ -2631,6 +2635,7 @@ zend_function_entry pinba_functions[] = {
                                         PINBA_FUNC(pinba_tag_set) PINBA_FUNC(pinba_tag_get)
                                             PINBA_FUNC(pinba_tag_delete) PINBA_FUNC(pinba_tags_get)
                                                 PHP_FE_END};
+// NOLINTEND(readability-math-missing-parentheses)
 /* }}} */
 
 /* {{{ arginfo */
@@ -2665,6 +2670,8 @@ ZEND_END_ARG_INFO()
 
 /* {{{ pinba_client_methods[]
  */
+// Zend computes argument counts inside PHP_FE and PHP_ME.
+// NOLINTBEGIN(readability-math-missing-parentheses)
 zend_function_entry pinba_client_methods[] = {
     PHP_ME(PinbaClient, __construct, arginfo___construct, ZEND_ACC_PUBLIC) PHP_ME(
         PinbaClient, setHostname, arginfo_setvalue, ZEND_ACC_PUBLIC)
@@ -2684,6 +2691,7 @@ zend_function_entry pinba_client_methods[] = {
                                         PHP_ME(PinbaClient, send, arginfo_send, ZEND_ACC_PUBLIC)
                                             PHP_ME(PinbaClient, getData, arginfo_getdata,
                                                    ZEND_ACC_PUBLIC) PHP_FE_END};
+// NOLINTEND(readability-math-missing-parentheses)
 /* }}} */
 
 static void php_pinba_sa_dtor(zval *zv) /* {{{ */
