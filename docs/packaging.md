@@ -24,6 +24,7 @@ Examples:
 - `php8.3-pinba`
 - `php8.4-pinba`
 - `php8.5-pinba`
+- `php8.6-pinba`
 
 ## Why Versioned Binary Packages
 
@@ -47,7 +48,7 @@ debian/
 ├── pinba.ini                   # mods-available template (extension=pinba.so)
 ├── php8.2-pinba.postinst       # phpenmod -v 8.2 pinba   (one pair per version)
 ├── php8.2-pinba.prerm          # phpdismod -v 8.2 pinba
-├── …                           # .postinst/.prerm for 8.3, 8.4, 8.5
+├── …                           # .postinst/.prerm for 8.3–8.6
 └── source/
     ├── format                  # 3.0 (quilt)
     ├── options                 # extend-diff-ignore for phpize build artifacts
@@ -92,7 +93,7 @@ This file is intended to become the source of truth for:
 2. [x] Implement package install maps for supported PHP branches (rules-driven, see above).
 3. [x] Validate the build. `packaging.yml` (`build-debs`) builds all four `php<ver>-pinba` binaries
    on Ubuntu with the `ondrej/php` PPA and runs `lintian`; also validated locally (`.so` loads into
-   PHP 8.2–8.5 and reports the correct version).
+   PHP 8.2–8.6 and reports the correct version).
 4. [x] Publish signed source packages to Launchpad — `packaging.yml` (`publish-ppa`), see below.
 5. [ ] Connect packaging rebuilds to the reviewed PHP discovery PR flow.
 
@@ -122,18 +123,25 @@ is installable on that suite. This differs by suite, so each suite's `php_versio
 
 | Suite | Ubuntu | Available `php<ver>-dev` | Source |
 |-------|--------|--------------------------|--------|
-| `noble` | 24.04 | 8.2, 8.3, 8.4, 8.5 | `ondrej/php` PPA dependency (the archive alone has only 8.3) |
-| `resolute` | 26.04 | 8.5 | the 26.04 archive (ondrej/php has **no** resolute series) |
+| `noble` | 24.04 | 8.2, 8.3, 8.4, 8.5, 8.6 | `ondrej/php` PPA dependency (the archive alone has only 8.3) |
+| `resolute` | 26.04 | 8.5 | the 26.04 archive |
 
 **Required one-time Launchpad setting** (for `noble`): the **PPA must depend on `ppa:ondrej/php`** —
-Launchpad → the PPA → *Edit PPA dependencies* → add `ppa:ondrej/php`. ondrej only publishes `jammy`
-and `noble`, which is why `resolute` falls back to the 26.04 archive's single php (8.5).
+Launchpad → the PPA → *Edit PPA dependencies* → add `ppa:ondrej/php`.
 
 The publish workflow enforces this automatically: for each suite it regenerates
 `debian/control` `Build-Depends` and the built binary set from that suite's `php_versions`, so a
 suite never build-depends on a `php<ver>-dev` it cannot install (which would otherwise leave the
-build in Launchpad "Dependency wait" forever). When a new suite gains more PHP versions (e.g. once
-ondrej adds a resolute series), just extend its `php_versions` here.
+build in Launchpad "Dependency wait" forever). Scheduled discovery refreshes the per-suite list from the APT indexes.
+
+### PHP packages from Surý on Ubuntu 26.04
+
+Surý publishes PHP 8.2–8.6 for Resolute in his
+[external APT repository](https://packages.sury.org/php/README.txt). The Resolute
+indexes in `ppa:ondrej/php` are empty. The Launchpad build uses the Ubuntu archive
+and configured PPA dependencies, so the Resolute upload targets PHP 8.5. Builds
+for the other PHP branches can use the external repository in a separate Ubuntu
+26.04 build environment.
 
 ### After upload
 

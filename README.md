@@ -6,7 +6,7 @@
 [![Release](https://img.shields.io/github/v/release/XOlegator/pinba_extension)](https://github.com/XOlegator/pinba_extension/releases/latest)
 [![Packagist](https://img.shields.io/packagist/v/xolegator/pinba_extension?logo=packagist&logoColor=white)](https://packagist.org/packages/xolegator/pinba_extension)
 [![Copr](https://copr.fedorainfracloud.org/coprs/xolegator/pinba/package/php-pinba/status_image/last_build.png)](https://copr.fedorainfracloud.org/coprs/xolegator/pinba/)
-[![PHP](https://img.shields.io/badge/PHP-8.0%20%E2%80%93%208.5-777BB4?logo=php&logoColor=white)](https://github.com/XOlegator/pinba_extension/blob/master/docs/support-matrix.md)
+[![PHP](https://img.shields.io/badge/PHP-8.0%20%E2%80%93%208.6-777BB4?logo=php&logoColor=white)](https://github.com/XOlegator/pinba_extension/blob/master/docs/support-matrix.md)
 [![License: LGPL-2.1](https://img.shields.io/badge/license-LGPL--2.1-blue)](https://github.com/XOlegator/pinba_extension/blob/master/COPYING)
 
 Pinba Extension is the PHP client extension for the Pinba monitoring stack. It collects timing
@@ -87,12 +87,14 @@ repository) so the matching `php<X.Y>` runtime is available:
 sudo add-apt-repository ppa:ondrej/php
 sudo add-apt-repository ppa:xolegator/packages
 sudo apt-get update
-sudo apt-get install php8.4-pinba   # also available on 24.04: php8.2-pinba, php8.5-pinba
+sudo apt-get install php8.6-pinba   # Ubuntu 24.04
 ```
 
-Availability per Ubuntu release: 24.04 `noble` offers `php8.2`–`php8.5` (8.3 from the base archive,
-the rest via `ondrej/php`); 26.04 `resolute` offers only `php8.5` (its base PHP — `ondrej/php` has no
-`resolute` series).
+The packaging matrix targets PHP 8.2–8.6 on Ubuntu 24.04 `noble` (base PHP 8.3 plus
+`ondrej/php`) and PHP 8.5 on Ubuntu 26.04 `resolute` (base archive). On Ubuntu 26.04,
+[Surý’s APT repository](https://packages.sury.org/php/README.txt) provides PHP 8.2–8.6.
+For a PHP version outside the Launchpad package matrix, build Pinba from source
+with the matching `php<version>-dev` package.
 
 The package installs the extension and enables it (`phpenmod`). Set the runtime options in a
 drop-in such as `/etc/php/<version>/mods-available/pinba.ini` (or a separate `conf.d` file), then
@@ -173,7 +175,7 @@ Install the build toolchain and the protobuf-c development headers for your plat
 **Docker (official PHP images)** — build and enable the extension in your image:
 
 ```dockerfile
-FROM php:8.5-fpm
+FROM php:8.6.0-fpm
 
 RUN apt-get update \
  && apt-get install -y --no-install-recommends $PHPIZE_DEPS git libprotobuf-c-dev \
@@ -204,10 +206,10 @@ as a manual source build.
 
 ## Development Baseline
 
-The active CI matrix builds the extension and runs the PHPT suite on `PHP 8.2`, `8.3`, `8.4`,
-and `8.5`, and enforces workflow, shell, and markdown linting plus `clang-format` and
-`clang-tidy` in GitHub Actions. The PHP matrix source of truth is `.github/php-versions.json`,
-and scheduled discovery automation refreshes it through PRs. Build-from-source steps are covered
+The required CI matrix builds the extension and runs the PHPT suite on PHP 8.0–8.6. PHP 8.7
+nightly runs as an experimental, non-blocking build. CI also enforces workflow, shell, and
+markdown linting plus `clang-format` and `clang-tidy`. Scheduled discovery automation refreshes
+the PHP matrix in `.github/php-versions.json` through PRs. Build-from-source steps are covered
 under [Installation](#from-source) and [docs/build.md](docs/build.md).
 
 ## Documentation

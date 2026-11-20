@@ -2,7 +2,7 @@
 
 This document records the active support policy for the modernization fork of `pinba_extension`.
 
-Status below is aligned with the official PHP supported versions page as checked on 2026-06-07.
+Status below is aligned with the official PHP supported versions page as checked on 2026-11-20.
 
 ## Target Ubuntu Releases
 
@@ -25,12 +25,13 @@ its vendor keeps patched for the OS lifetime.
 These follow the official PHP lifecycle and form the primary build-and-test matrix. They are also
 the branches packaged for Ubuntu (`php<ver>-pinba`).
 
-| PHP branch | Upstream status on 2026-06-07 |
+| PHP branch | Upstream status on 2026-11-20 |
 | --- | --- |
 | `8.2` | security support only until `2026-12-31` |
 | `8.3` | security support only until `2027-12-31` |
 | `8.4` | active support until `2026-12-31` |
 | `8.5` | active support until `2027-12-31` |
+| `8.6` | active support until `2028-12-31` |
 
 ## Tier B — distro-native branches on supported operating systems
 
@@ -42,6 +43,10 @@ that OS's lifetime. They are built and load-tested (and kept in the CI build-and
 | --- | --- | --- |
 | `8.0` | AlmaLinux / RHEL 9 (non-modular base) | minimum supported; `dnf install php` → 8.0, no module needed |
 | `8.1` | available on EL9 as a module stream | built and tested so the EL9 opt-in stream is covered |
+
+## Experimental PHP Branches
+
+PHP 8.7 nightly runs in the non-blocking CI job. Release verification and packaging use stable PHP branches.
 
 ## Out Of Scope PHP Branches
 

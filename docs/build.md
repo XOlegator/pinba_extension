@@ -8,8 +8,9 @@ The current active development baseline targets these PHP branches:
 - `PHP 8.3`
 - `PHP 8.4`
 - `PHP 8.5`
+- `PHP 8.6`
 
-Older PHP branches are not part of the active support matrix for this fork.
+CI also covers PHP 8.0 and 8.1 for Enterprise Linux 9 compatibility.
 
 The machine-readable source of truth for that matrix is:
 
@@ -114,11 +115,8 @@ tools/run-tests.sh valgrind   # run each test under Valgrind memcheck (needs val
 
 GitHub Actions currently validates:
 
-- build on `PHP 8.2`
-- build on `PHP 8.3`
-- build on `PHP 8.4`
-- build on `PHP 8.5`
-- PHPT execution on the same matrix
+- required builds and PHPT tests on PHP 8.0–8.6
+- experimental, non-blocking build and PHPT tests on PHP 8.7 nightly
 - C code coverage (gcov/gcovr) uploaded to Codecov
 - AddressSanitizer + UBSan run of the PHPT suite against an ASan-instrumented PHP
 - a thread-safe (ZTS) build, run against the PHPT suite under ASan/UBSan

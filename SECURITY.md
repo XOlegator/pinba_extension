@@ -7,12 +7,13 @@ Security fixes are developed on the active `master` branch of this fork.
 ## Supported Runtime Matrix
 
 The project targets officially supported PHP branches tracked by this fork's CI and release
-policy. As of 2026-06-07, the active matrix is:
+policy. As of 2026-11-20, the active matrix is:
 
 - `PHP 8.2`
 - `PHP 8.3`
 - `PHP 8.4`
 - `PHP 8.5`
+- `PHP 8.6`
 
 Older end-of-life PHP branches are not supported for security maintenance in this fork.
 

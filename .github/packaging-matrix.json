@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-06-07",
+  "generated_at": "2026-11-20",
   "source_package": "php-pinba",
   "ppa": "ppa:xolegator/packages",
   "suites": {
@@ -10,7 +10,8 @@
         "8.2",
         "8.3",
         "8.4",
-        "8.5"
+        "8.5",
+        "8.6"
       ]
     },
     "resolute": {
@@ -26,7 +27,7 @@
     "A discovered PHP branch is not enabled for packaging automatically until CI is green.",
     "Launchpad builds should be driven by distro-specific source uploads and reviewed PRs.",
     "base_php_version is the suite's distro-native PHP (the version in the Ubuntu archive before any third-party PPA): noble (24.04) -> 8.3, resolute (26.04) -> 8.5. Its php<ver>-pinba is the 'base' package, installable on a clean OS with no ondrej/php. Informational constant, kept by update-packaging-matrix.php (which only rewrites php_versions); the build-base-deb CI job builds and load-tests it in a pristine ubuntu container.",
-    "php_versions per suite must be the PHP versions actually installable on the Launchpad build farm for that suite. noble (24.04) gets 8.2-8.5 via the ondrej/php PPA dependency; resolute (26.04) gets only 8.5 because the 26.04 archive ships only php8.5 and ondrej/php has no resolute series.",
+    "php_versions per suite must be the PHP versions actually installable on the Launchpad build farm for that suite. noble (24.04) gets 8.2-8.6 via the Ubuntu archive and the ondrej/php PPA dependency; resolute (26.04) gets 8.5 from the Ubuntu archive.",
     "The publish workflow regenerates debian/control Build-Depends per suite from these php_versions, so each suite only build-depends on the php<ver>-dev it can install."
   ]
 }

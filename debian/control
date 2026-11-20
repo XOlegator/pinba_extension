@@ -8,6 +8,7 @@ Build-Depends:
  php8.3-dev,
  php8.4-dev,
  php8.5-dev,
+ php8.6-dev,
  libprotobuf-c-dev,
  pkgconf
 Standards-Version: 4.7.0
@@ -63,3 +64,15 @@ Description: Pinba timer/profiling extension for PHP 8.5
  and user-defined timers.
  .
  This package provides the extension built for PHP 8.5.
+
+Package: php8.6-pinba
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}, ${php:Depends}, php8.6-common
+Provides: php-pinba
+Description: Pinba timer/profiling extension for PHP 8.6
+ Pinba measures PHP script execution and sends compact Protocol Buffers
+ statistics over UDP to a Pinba server — the pinba_engine storage engine for
+ MySQL or MariaDB — enabling real-time monitoring of request time, memory usage
+ and user-defined timers.
+ .
+ This package provides the extension built for PHP 8.6.
